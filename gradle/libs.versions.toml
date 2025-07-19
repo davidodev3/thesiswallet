@@ -1,0 +1,97 @@
+[versions]
+agp = "8.8.0"
+kotlin = "2.0.0"
+
+
+
+coreKtx = "1.16.0"
+junit = "4.13.2"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+appcompat = "1.7.1"
+kotlinxCoroutinesAndroid = "1.10.1"
+
+
+kotlinxCoroutinesCore = "1.10.2"
+kotlinxSerializationJson = "1.8.1"
+material = "1.12.0"
+activity = "1.10.1"
+constraintlayout = "2.1.4"
+lifecycleRuntimeKtx = "2.9.1"
+activityCompose = "1.10.1"
+composeBom = "2025.06.01"
+navigationCompose = "2.9.1"
+
+navigationFragmentKtx = "2.6.0"
+navigationUiKtx = "2.6.0"
+registryDigitalcredentialsPreview = "1.0.0-alpha01"
+waltidVerifiableCredentials = "0.15.0"
+navigationComposeAndroid = "2.9.1"
+navigationRuntimeAndroid = "2.9.1"
+registryDigitalCredentials = "1.0.0-alpha01"
+serialization = "2.2.0"
+
+
+[libraries]
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+
+
+
+
+
+
+
+
+
+
+
+
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-registry-digitalcredentials-preview = { module = "androidx.credentials.registry:registry-digitalcredentials-preview", version.ref = "registryDigitalcredentialsPreview" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
+androidx-credentials-provider-registry-play-services = { module = "androidx.credentials:credentials-provider-registry-play-services" }
+
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+
+androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
+androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
+waltid-crypto = { module = "id.walt.crypto:waltid-crypto", version.ref = "waltidVerifiableCredentials" }
+waltid-digital-credentials = { module = "id.walt.credentials:waltid-digital-credentials", version.ref = "waltidVerifiableCredentials" }
+waltid-policies = { module = "id.walt.policies:waltid-verification-policies", version.ref = "waltidVerifiableCredentials" }
+waltid-did = { module = "id.walt.did:waltid-did", version.ref = "waltidVerifiableCredentials" }
+waltid-verifiable-credentials = { module = "id.walt.credentials:waltid-w3c-credentials", version.ref = "waltidVerifiableCredentials" }
+waltid-sdjwt = { module = "id.walt.sdjwt:waltid-sdjwt", version.ref = "waltidVerifiableCredentials" }
+
+androidx-navigation-compose-android = { group = "androidx.navigation", name = "navigation-compose-android", version.ref = "navigationComposeAndroid" }
+androidx-navigation-runtime-android = { group = "androidx.navigation", name = "navigation-runtime-android", version.ref = "navigationRuntimeAndroid" }
+androidx-registry-provider = { module = "androidx.credentials.registry:registry-provider", version.ref = "registryDigitalCredentials" }
+
+androidx-registry-provider-play-services = { module = "androidx.credentials.registry:registry-provider-play-services", version.ref = "registryDigitalCredentials" }
+
+[plugins]
+compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "serialization"}
+
+androidk = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+
+android-application = { id = "com.android.application", version.ref = "agp" }
