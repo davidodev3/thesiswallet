@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -37,37 +38,47 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.getValue
+
+
+
+
+
+
+
+
+
+
+
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-
-
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+
 import androidx.navigation.toRoute
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonPrimitive
 
 @Serializable
 class Wallet(val name: String)
+
 @Serializable
 object Home
+
 @Serializable
 object Profile
 @Serializable
-
 class Credential(val credential: String)
-
 @Serializable
 object Login
 
@@ -75,6 +86,7 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
+
     setContent {
       MyHost()
     }
@@ -125,6 +137,17 @@ fun MainScreen(onClick: (String) -> Unit, onProfileClick: () -> Unit) {
         Greeting(
           name = "Android", modifier = Modifier.padding(innerPadding)
         )
+
+
+
+
+
+
+
+
+
+
+
         Subtitle()
         Regeneration()
         ListColumn(onClick = onClick)
@@ -141,18 +164,8 @@ fun MainScreen(onClick: (String) -> Unit, onProfileClick: () -> Unit) {
 class WalletModel(application: Application) : AndroidViewModel(application), SharedPreferences.OnSharedPreferenceChangeListener {
   private val _walletPrefs = (application.getSharedPreferences("wallets", Context.MODE_PRIVATE))
 
-
-
-
-
-
-
-
-
-
-
-
   private val _wallets = MutableStateFlow(_walletPrefs.all.keys.toMutableList())
+
   val wallets = _wallets.asStateFlow()
 
   init {

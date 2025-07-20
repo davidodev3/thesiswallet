@@ -17,6 +17,7 @@ dependencyResolutionManagement {
       google()
       mavenCentral()
       maven { url = uri("https://maven.waltid.dev/releases") }
+      maven("https://maven.waltid.dev/snapshots")
    }
 }
 
