@@ -1,7 +1,10 @@
 package com.example.mobilewallet
 
+import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.content.Intent
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -69,6 +72,8 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
   var showDialog by remember { mutableStateOf(false) }
   var content by remember { mutableStateOf("") }
 
+  val activity = LocalActivity.current
+
   //TODO: dialog
   MobileWalletTheme {
 
@@ -85,7 +90,18 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
             try {
               content = credentialModel.generatePresentation(credential)
             } finally {
-              showDialog = true
+              //If this app was called by the Verifier send the token back.
+              if (activity?.callingPackage == "com.example.mobileverifier") {
+                val result = Intent().apply {
+                  //Key "vp_token" as per OpenID for Verifiable Presentations
+                  putExtra("vp_token", content)
+                }
+                activity.setResult(Activity.RESULT_OK, result)
+                activity.finish()
+              }
+              else {
+                showDialog = true
+              }
             }
           }
         }) { Text("Generate presentation") }

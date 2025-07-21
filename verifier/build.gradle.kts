@@ -77,7 +77,7 @@ dependencies {
   implementation(libs.waltid.verifiable.credentials)
   implementation(libs.waltid.policies)
   implementation(libs.waltid.did)
-  implementation(libs.waltid.openid4vc)
+  implementation(libs.waltid.crypto)
   implementation(libs.kotlinx.serialization.json)
   implementation(libs.androidx.credentials)
   implementation(libs.androidx.credentials.play.services.auth)

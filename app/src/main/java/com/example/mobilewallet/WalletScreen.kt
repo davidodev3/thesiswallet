@@ -252,6 +252,7 @@ fun CredentialCard(jwt: String, onClick: (String) -> Unit, delete: () -> Unit) {
     Row() {
       val payload = tokenToPayload(jwt).jsonObject
 
+      //Get the actual credential type (the one at position 0 is "VerifiableCredential")
       Text(((payload["vc"] as JsonObject)["type"] as JsonArray)[1].toString(), Modifier.padding(16.00.dp))
       IconButton(onClick = delete) {
         Icon(
