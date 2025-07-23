@@ -37,9 +37,7 @@ suspend fun generateCredential(
     issuer,
     subjectDid = "did:key:z6MkmLUYGGZXTCAqq7PtavWYTD93B8mw3dkjL5e1PSqQRPTr" //TODO
   )
-
   return signed
-
 }
 
 
