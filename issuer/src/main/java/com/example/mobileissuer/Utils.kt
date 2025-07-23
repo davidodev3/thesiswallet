@@ -11,7 +11,9 @@ import kotlin.time.Duration.Companion.days
 suspend fun generateCredential(
   type: String,
   map: Map<String, String>,
+
   issuer: String,
+
 
   key: String
 ): String {
@@ -29,22 +31,29 @@ suspend fun generateCredential(
     issuerDid = issuer
     validFromNow()
     subjectDid = "did:key:z6MkmLUYGGZXTCAqq7PtavWYTD93B8mw3dkjL5e1PSqQRPTr" //TODO Hardcoded
+
     useCredentialSubject(map.toJsonObject())
   }.buildW3C()
 
   val signed = credential.signJws(
     JWKKey.importJWK(key).getOrNull()!!,  //The JWK was exported as a string to be saved as SharedPreference.
+
+
+
+
+
+
+
+
+
+
+
     issuer,
     subjectDid = "did:key:z6MkmLUYGGZXTCAqq7PtavWYTD93B8mw3dkjL5e1PSqQRPTr" //TODO
   )
+
   return signed
 }
-
-
-
-
-
-
 
 //Generate a key using Ed25519 algorithm and a DID using that key.
 suspend fun generateKeyDid() : Pair<JWKKey, String> {
@@ -52,5 +61,6 @@ suspend fun generateKeyDid() : Pair<JWKKey, String> {
 
   val key = JWKKey.generate(KeyType.Ed25519)
   val did = DidService.registerByKey("key", key).did
+
   return Pair(key, did)
 }
