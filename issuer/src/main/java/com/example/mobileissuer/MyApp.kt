@@ -1,12 +1,11 @@
 package com.example.mobileissuer
 
 import android.app.Application
+
 import android.content.Context
-import id.walt.crypto.keys.KeyType
-import id.walt.did.dids.DidService
-import id.walt.crypto.keys.jwk.JWKKey
 import kotlinx.coroutines.*
 import java.security.Security
+
 import kotlin.coroutines.CoroutineContext
 
 class MyApp : Application(), CoroutineScope {
@@ -31,25 +30,9 @@ class MyApp : Application(), CoroutineScope {
           putString("key", resolved.first.exportJWK())
           apply()
         }
-
       }
+
     }
   }
 
-}
-
-
-
-
-
-
-
-
-
-
-suspend fun generateKeyDid() : Pair<JWKKey, String> {
-  DidService.minimalInit()
-  val key = JWKKey.generate(KeyType.Ed25519) //This was supposed to be Ed25519 but apparently that does not really work without external security providers.
-  val did = DidService.registerByKey("key", key).did
-  return Pair(key, did)
 }
