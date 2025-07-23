@@ -42,9 +42,16 @@ suspend fun generateCredential(
 
 }
 
+
+
+
+
+
+
 //Generate a key using Ed25519 algorithm and a DID using that key.
 suspend fun generateKeyDid() : Pair<JWKKey, String> {
   DidService.minimalInit()
+
   val key = JWKKey.generate(KeyType.Ed25519)
   val did = DidService.registerByKey("key", key).did
   return Pair(key, did)
