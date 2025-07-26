@@ -11,6 +11,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -20,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mobileissuer.ui.theme.MobileWalletTheme
@@ -35,19 +37,19 @@ class CredentialModel(context: Application) : AndroidViewModel(context) {
   So in short no preference listener.*/
   private val prefs = context.getSharedPreferences("did", Context.MODE_PRIVATE)
 
+
+
+
+
+
+
+
+
+
+
+
   //Mapping of data to be passed to the generated credential
   private val _mapping = MutableStateFlow(mutableStateMapOf<String, String>())
-
-
-
-
-
-
-
-
-
-
-
   val mapping = _mapping.asStateFlow()
 
   fun getDid(): String {
@@ -59,6 +61,7 @@ class CredentialModel(context: Application) : AndroidViewModel(context) {
   }
 
   fun updateMap(key: String, value: String) {
+
     _mapping.value[key] = value
   }
 
@@ -71,7 +74,6 @@ class CredentialModel(context: Application) : AndroidViewModel(context) {
 
 }
 
-
 @Composable
 fun CredentialScreen(credential: String, credentialModel: CredentialModel = viewModel()) {
   var showDialog by remember { mutableStateOf(false) }
@@ -79,6 +81,7 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
   var loading by remember { mutableStateOf(false) }
   val fields: @Composable () -> Unit
   val mapping by credentialModel.mapping.collectAsStateWithLifecycle()
+
   val coroutineScope = rememberCoroutineScope()
 
   /*Passing a map to generate a credential is the most convenient way
@@ -88,6 +91,7 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
     fields = {
       var type by remember { mutableStateOf("") }
       var name by remember { mutableStateOf("") }
+
       OutlinedTextField(value = type, onValueChange = { v: String ->
         mapping["type"] = v
         type = v
@@ -97,6 +101,7 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
         name = v
       }, label = {Text("Name")})
     }
+
   } else if (credential == "Visa") {
     fields = {
       var firstName by remember { mutableStateOf("") }
@@ -106,13 +111,17 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
       var nationality by remember { mutableStateOf("") }
       var dateOfBirth by remember { mutableStateOf("") }
       var passportNumber by remember { mutableStateOf("") }
+
       var visaType by remember { mutableStateOf("") }
       var entryNumber by remember { mutableStateOf("") }
-      val visaValidity = remember { mutableStateMapOf<String, String>() }
+      //start and end should be keys of the visaValidity submap, but Kotlin doesn't support multityping so we simplify
+      var start by remember { mutableStateOf("") }
+      var end by remember { mutableStateOf("") }
       var purposeOfVisit by remember { mutableStateOf("") }
       OutlinedTextField(value = firstName, onValueChange = { v: String ->
-
         mapping["firstName"] = v
+
+
         firstName = v
       }, label = {Text("First name")})
       OutlinedTextField(value = lastName, onValueChange = { v: String ->
@@ -121,13 +130,24 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
       }, label = {Text("Last name")})
       OutlinedTextField(value = gender, onValueChange = { v: String ->
         mapping["gender"] = v
-
         gender = v
+
       }, label = {Text("Gender")})
       OutlinedTextField(value = nationality, onValueChange = { v: String ->
         mapping["nationality"] = v
         nationality = v
       }, label = {Text("Nationality")})
+
+
+
+
+
+
+
+
+
+
+
       OutlinedTextField(value = dateOfBirth, onValueChange = { v: String ->
         mapping["dateOfBirth"] = v
         dateOfBirth = v
@@ -137,23 +157,31 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
         mapping["passportNumber"] = v
         passportNumber = v
       }, label = {Text("Passport number")})
-
-
-
-
-
-
-
-
-
-
-
       OutlinedTextField(value = visaType, onValueChange = { v: String ->
         mapping["visaType"] = v
         visaType = v
       }, label = {Text("Visa type")})
+
+      OutlinedTextField(value = entryNumber, onValueChange = { v: String ->
+        mapping["entryNumber"] = v
+        entryNumber = v
+      }, label = {Text("Entry Number")})
+      OutlinedTextField(value = start, onValueChange = { v: String ->
+        mapping["start"] = v
+        start = v
+      }, label = {Text("Validity start")})
+      OutlinedTextField(value = end, onValueChange = { v: String ->
+
+        mapping["end"] = v
+        end = v
+      }, label = {Text("Validity end")})
+      OutlinedTextField(value = purposeOfVisit, onValueChange = { v: String ->
+        mapping["purposeOfVisit"] = v
+        purposeOfVisit = v
+      }, label = {Text("Purpose of visit")})
     }
   } else {
+
     fields = {}
   }
 
@@ -161,36 +189,33 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
     CredentialDialog(content) { showDialog = false }
   }
   MobileWalletTheme {
-
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
       Column(modifier = Modifier.padding(innerPadding)) {
+
         Text("University Degree")
         fields()
-
         ElevatedButton(onClick = {
           coroutineScope.launch {
             loading = true
             try {
-
               content = credentialModel.generateCredential(
                 credential
               )
+
             } finally {
               loading = false
-
             }
           }
           showDialog = true
-
         }) {
           if (loading) {
             CircularProgressIndicator()
           } else {
+
             Text("Generate")
           }
         }
       }
     }
-
   }
 }

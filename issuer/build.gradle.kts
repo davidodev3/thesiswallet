@@ -13,7 +13,7 @@ android {
 
   defaultConfig {
     applicationId = "com.example.mobileissuer"
-    minSdk = 25
+    minSdk = 26
     targetSdk = 35
     versionCode = 1
     versionName = "1.0"
@@ -68,11 +68,11 @@ dependencies {
   implementation(libs.androidx.ui.tooling.preview)
   implementation(libs.androidx.material3)
   implementation(libs.androidx.navigation.compose.android)
-
   implementation(      libs.androidx.navigation.runtime.android)
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)
 
+  implementation(libs.kotlinx.datetime)
   implementation(libs.kotlinx.serialization.json)
   implementation(libs.waltid.verifiable.credentials)
   implementation(libs.waltid.crypto)

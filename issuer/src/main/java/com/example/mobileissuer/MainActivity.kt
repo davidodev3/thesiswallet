@@ -83,6 +83,7 @@ fun MyHost(
             Heading(
               modifier = Modifier.padding(innerPadding)
             )
+            CredentialCard("Visa") { navController.navigate(Credential("Visa")) }
             CredentialCard("University Degree") { navController.navigate(Credential("UniversityDegree")) }
             Regeneration()
           }
