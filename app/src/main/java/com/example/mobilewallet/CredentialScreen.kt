@@ -1,6 +1,7 @@
 package com.example.mobilewallet
 
 import android.app.Activity
+
 import android.app.Application
 import android.content.Context
 import android.content.Intent
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
+
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -29,15 +31,27 @@ import com.example.mobilewallet.ui.theme.MobileWalletTheme
 import id.walt.crypto.keys.jwk.JWKKey
 import id.walt.did.dids.DidService
 import id.walt.w3c.PresentationBuilder
+
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
+
+
+
+
+
+
+
+
+
+
 class CredentialModel(context: Application) : AndroidViewModel(context) {
   private val _prefs = context.getSharedPreferences("did", Context.MODE_PRIVATE)
 
   @OptIn(ExperimentalUuidApi::class)
+
   suspend fun generatePresentation(credential: String): String {
     DidService.minimalInit()
     val presentation = PresentationBuilder().apply {
@@ -45,13 +59,6 @@ class CredentialModel(context: Application) : AndroidViewModel(context) {
       nonce = Uuid.random().toString() //Generate a random string every time to be used as nonce
       addCredential(JsonPrimitive(credential))
     }
-
-
-
-
-
-
-
 
     val key = _prefs.getString("key", "") ?: ""
 
@@ -74,6 +81,7 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
 
   val activity = LocalActivity.current
 
+
   //TODO: dialog
   MobileWalletTheme {
 
@@ -83,6 +91,7 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
       }
       Column(modifier = Modifier
         .padding(innerPadding)
+
         .verticalScroll(rememberScrollState())) {
         Text(tokenToPayload(credential).toString())
         TextButton(onClick = {
@@ -92,6 +101,7 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
             } finally {
               //If this app was called by the Verifier send the token back.
               if (activity?.callingPackage == "com.example.mobileverifier") {
+
                 val result = Intent().apply {
                   //Key "vp_token" as per OpenID for Verifiable Presentations
                   putExtra("vp_token", content)
@@ -101,6 +111,7 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
               }
               else {
                 showDialog = true
+
               }
             }
           }
@@ -110,6 +121,7 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
         TextButton(onClick = {
           clipboardManager.setText(AnnotatedString(credentialModel.getDid()))
         }) {Text("Copy did")}
+
       }
     }
 
@@ -119,22 +131,27 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
 @Composable
 
 fun CredentialDialog(content: String, onDismissRequest: () -> Unit) {
+
   AlertDialog(
     onDismissRequest = onDismissRequest,
     title = { Text(text = "Verifiable presentation:") },
     dismissButton = {
       TextButton(onClick = onDismissRequest) { Text("Dismiss") }
+
+
+
+
+
+
+
+
+
+
+
     },
-
-
-
-
-
-
-
-
     confirmButton = {
       val clipboardManager = LocalClipboardManager.current
+
       TextButton(onClick = {
         clipboardManager.setText(AnnotatedString(content))
 
@@ -144,9 +161,9 @@ fun CredentialDialog(content: String, onDismissRequest: () -> Unit) {
 
     text = {
       SelectionContainer {
+
         Text(content, modifier = Modifier.verticalScroll(rememberScrollState()))
       }
     },
-
     )
 }
