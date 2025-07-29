@@ -104,20 +104,18 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
 
   } else if (credential == "Visa") {
     fields = {
-      var firstName by remember { mutableStateOf("") }
-      var lastName by remember { mutableStateOf("") }
+      var firstName by remember { mutableStateOf("John") }
+      var lastName by remember { mutableStateOf("Doe") }
 
-      var gender by remember { mutableStateOf("") }
-      var nationality by remember { mutableStateOf("") }
-      var dateOfBirth by remember { mutableStateOf("") }
-      var passportNumber by remember { mutableStateOf("") }
+      var gender by remember { mutableStateOf("M") }
+      var nationality by remember { mutableStateOf("Canadian") }
+      var dateOfBirth by remember { mutableStateOf("1/1/1970") }
+      var passportNumber by remember { mutableStateOf("AAAAAA") }
 
-      var visaType by remember { mutableStateOf("") }
-      var entryNumber by remember { mutableStateOf("") }
-      //start and end should be keys of the visaValidity submap, but Kotlin doesn't support multityping so we simplify
-      var start by remember { mutableStateOf("") }
-      var end by remember { mutableStateOf("") }
-      var purposeOfVisit by remember { mutableStateOf("") }
+      var visaType by remember { mutableStateOf("Tourism") }
+      var entryNumber by remember { mutableStateOf("Single") }
+      var duration by remember { mutableStateOf("90") }
+      var purposeOfVisit by remember { mutableStateOf("Tourism") }
       OutlinedTextField(value = firstName, onValueChange = { v: String ->
         mapping["firstName"] = v
 
@@ -151,9 +149,9 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
       OutlinedTextField(value = dateOfBirth, onValueChange = { v: String ->
         mapping["dateOfBirth"] = v
         dateOfBirth = v
-
       }, label = {Text("Date of birth")})
       OutlinedTextField(value = passportNumber, onValueChange = { v: String ->
+
         mapping["passportNumber"] = v
         passportNumber = v
       }, label = {Text("Passport number")})
@@ -161,33 +159,29 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
         mapping["visaType"] = v
         visaType = v
       }, label = {Text("Visa type")})
-
       OutlinedTextField(value = entryNumber, onValueChange = { v: String ->
         mapping["entryNumber"] = v
+
         entryNumber = v
       }, label = {Text("Entry Number")})
-      OutlinedTextField(value = start, onValueChange = { v: String ->
-        mapping["start"] = v
-        start = v
-      }, label = {Text("Validity start")})
-      OutlinedTextField(value = end, onValueChange = { v: String ->
-
-        mapping["end"] = v
-        end = v
-      }, label = {Text("Validity end")})
+      OutlinedTextField(value = duration, onValueChange = { v: String ->
+        mapping["duration"] = v
+        duration = v
+      }, label = {Text("Duration")})
       OutlinedTextField(value = purposeOfVisit, onValueChange = { v: String ->
         mapping["purposeOfVisit"] = v
         purposeOfVisit = v
+
       }, label = {Text("Purpose of visit")})
     }
   } else {
-
     fields = {}
   }
 
   if (showDialog) {
     CredentialDialog(content) { showDialog = false }
   }
+
   MobileWalletTheme {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
       Column(modifier = Modifier.padding(innerPadding)) {
@@ -197,6 +191,7 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
         ElevatedButton(onClick = {
           coroutineScope.launch {
             loading = true
+
             try {
               content = credentialModel.generateCredential(
                 credential
@@ -206,16 +201,17 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
               loading = false
             }
           }
+
           showDialog = true
         }) {
           if (loading) {
             CircularProgressIndicator()
           } else {
-
             Text("Generate")
           }
         }
       }
+
     }
   }
 }
