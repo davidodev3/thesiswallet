@@ -16,9 +16,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 fun ProfileScreen(profileModel: ProfileModel = viewModel()) {
   Scaffold { innerPadding ->
     Column(modifier = Modifier.padding(innerPadding)) {
-      Text("key: ${profileModel.getKey()}")
-      Text("did: ${profileModel.getDid()}")
+      Text("key: ${profileModel.getKey().take(28)}")
+      Text("did: ${profileModel.getDid().take(28)}")
+      Regeneration()
+
     }
+
   }
 }
 
@@ -28,8 +31,8 @@ class ProfileModel(application: Application) : AndroidViewModel(application) {
   //Not exposed as state flow because these at worst change once per application start.
   fun getKey() : String {
     return _prefs.getString("key", "") ?: ""
-  }
 
+  }
   fun getDid() : String {
     return _prefs.getString("did", "") ?: ""
   }

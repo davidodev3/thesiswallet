@@ -63,6 +63,7 @@ import id.walt.did.dids.DidService
 import id.walt.policies.Verifier
 
 import id.walt.policies.models.PolicyRequest
+import id.walt.policies.policies.ExpirationDatePolicy
 import id.walt.policies.policies.JwtSignaturePolicy
 import id.walt.policies.policies.vp.HolderBindingPolicy
 import id.walt.w3c.utils.VCFormat
@@ -79,13 +80,11 @@ class MainActivity : ComponentActivity() {
     enableEdgeToEdge()
     setContent {
       MobileWalletTheme {
-
         var vpToken by rememberSaveable { mutableStateOf("") }
 
         var overallSuccess by rememberSaveable { mutableStateOf(false) }
         var showDialog by rememberSaveable { mutableStateOf(false) }
         val coroutine = rememberCoroutineScope()
-
         val getToken =
           rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { value ->
             if (value.resultCode == Activity.RESULT_OK) {
@@ -101,8 +100,8 @@ class MainActivity : ComponentActivity() {
           }
           Column(
             modifier = Modifier
-
               .padding(innerPadding)
+
               .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.SpaceBetween
           ) {
@@ -112,6 +111,7 @@ class MainActivity : ComponentActivity() {
               Fields { fieldInput ->
                 try {
                   //Launch a coroutine that verifies the presentation and then show the results in the dialog.
+
                   coroutine.launch {
                     overallSuccess = coroutine.async {
                       verify(fieldInput)
@@ -121,6 +121,7 @@ class MainActivity : ComponentActivity() {
                   showDialog = true
                 }
               }
+
               Text("Or request a verifiable presentation from the wallet.")
               Presentation(getToken)
             } else {
@@ -130,25 +131,27 @@ class MainActivity : ComponentActivity() {
                   //Launch a coroutine that verifies the presentation and then show the results in the dialog.
                   coroutine.launch {
                     overallSuccess = coroutine.async {
+
                       verify(vpToken)
                     }.await()
                   }
                 } finally {
                   showDialog = true
+
+
+
+
+
+
+
+
+
+
+
                 }
               }) { Text("Verify") }
-
-
-
-
-
-
-
-
-
-
-
             }
+
           }
         }
       }
@@ -158,16 +161,17 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
+
 fun Heading(modifier: Modifier = Modifier) {
   Text(
-    text = "Verify", modifier = modifier, fontSize = TextUnit(38.0f, TextUnitType.Sp)
 
+    text = "Verify", modifier = modifier, fontSize = TextUnit(38.0f, TextUnitType.Sp)
   )
 }
 
-
 @Composable
 fun Fields(onSubmit: (String) -> Unit) {
+
   var fieldInput by rememberSaveable { mutableStateOf("") }
   Column {
     OutlinedTextField(value = fieldInput, onValueChange = { v -> fieldInput = v })
@@ -177,23 +181,27 @@ fun Fields(onSubmit: (String) -> Unit) {
 }
 
 suspend fun verify(presentation: String): Boolean {
-  DidService.minimalInit()
 
+  DidService.minimalInit()
   val vpPolicies = listOf(PolicyRequest(HolderBindingPolicy()))
   val globalPolicies = listOf(PolicyRequest(JwtSignaturePolicy()))
+
+  val specificPolicies = mutableMapOf("Visa" to listOf(PolicyRequest(ExpirationDatePolicy())))
 
   return Verifier.verifyPresentation(
     VCFormat.jwt,
     presentation,
     vpPolicies,
     globalPolicies,
-    mutableMapOf(), //Leave exceptions empty for now TODO
+    specificPolicies,
   ).overallSuccess()
+
 }
 
 @Composable
 fun ResultDialog(success: Boolean, onDismissRequest: () -> Unit) {
   AlertDialog(
+
     onDismissRequest = onDismissRequest,
     title = { Text(text = "Verification:") },
     dismissButton = {
@@ -201,9 +209,9 @@ fun ResultDialog(success: Boolean, onDismissRequest: () -> Unit) {
     },
     confirmButton = {
       TextButton(onClick = {
-
         onDismissRequest()
       }) { Text("Confirm") }
+
     },
     text = {
       Text(if (success) "SUCCESS" else "FAILURE")
@@ -213,6 +221,7 @@ fun ResultDialog(success: Boolean, onDismissRequest: () -> Unit) {
 
 
 @Composable
+
 fun Presentation(launcher: ActivityResultLauncher<Intent>) {
 
   val context = LocalContext.current
@@ -221,13 +230,24 @@ fun Presentation(launcher: ActivityResultLauncher<Intent>) {
 
   Row {
     ElevatedButton(onClick = {
-
       coroutineScope.launch {
+
         result = coroutineScope.async {
           credentialRequest(false, context, launcher)
         }.await()
       }
     }) {
+
+
+
+
+
+
+
+
+
+
+
       Text("Custom request")
     }
     ElevatedButton(onClick = {
@@ -237,22 +257,11 @@ fun Presentation(launcher: ActivityResultLauncher<Intent>) {
           credentialRequest(true, context, launcher)
         }.await()
       }
-
-
-
-
-
-
-
-
-
-
-
     }) {
       Text("Using DCAPI")
     }
-
   }
+
 }
 
 @OptIn(ExperimentalDigitalCredentialApi::class, ExperimentalUuidApi::class)
@@ -260,6 +269,7 @@ suspend fun credentialRequest(
   usesAPI: Boolean, context: Context, launcher: ActivityResultLauncher<Intent>
 ): Boolean {
   val credentialManager = CredentialManager.create(context)
+
 
 
   /*OpenID for Verifiable Presentation has finally reached a final specification.
