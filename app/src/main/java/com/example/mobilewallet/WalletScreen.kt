@@ -61,6 +61,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mobilewallet.ui.theme.MobileWalletTheme
 import kotlinx.coroutines.flow.MutableStateFlow
+
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -70,6 +71,7 @@ import kotlinx.serialization.json.jsonObject
 import java.util.Base64
 
 @Composable
+
 fun WalletScreen(name: String, onClick: (String) -> Unit) {
   val context = LocalContext.current
   var showDialog by remember { mutableStateOf(false) }
@@ -89,6 +91,7 @@ fun WalletScreen(name: String, onClick: (String) -> Unit) {
     }) { innerPadding ->
       if (showDialog) {
         AddDocumentDialog(dom) { showDialog = false }
+
       }
       Column(modifier = Modifier.padding(innerPadding)) {
 
@@ -108,8 +111,8 @@ class DocumentModel(val name: String, private val application: Application) : An
     _walletPrefs.getStringSet(name, mutableSetOf<String>())?.toMutableList()
       ?: mutableListOf<String>()
   )
-  val documents = _documents.asStateFlow()
 
+  val documents = _documents.asStateFlow()
   init {
 
     _walletPrefs.registerOnSharedPreferenceChangeListener(this)
@@ -118,6 +121,7 @@ class DocumentModel(val name: String, private val application: Application) : An
   override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
     _documents.value =
       sharedPreferences.getStringSet(key, mutableSetOf<String>())?.toMutableList()
+
         ?: mutableListOf<String>()
   }
 
@@ -219,67 +223,6 @@ fun WalletName(name: String) {
   Text(name, fontSize = TextUnit(38.0f,
     TextUnitType.Sp)
   )
-}
-
-
-@Composable
-fun AddDocumentDialog(documentModel: DocumentModel, onDismissRequest: () -> Unit) {
-  var value by remember { mutableStateOf("") }
-  AlertDialog(
-    onDismissRequest = onDismissRequest,
-    title = { Text(text = "Import credential") },
-    dismissButton = {
-      TextButton(onClick = onDismissRequest) { Text("Dismiss") }
-    },
-
-    confirmButton = {
-      TextButton(onClick = {
-        documentModel.addDocument(value)
-        onDismissRequest()
-      }) { Text("Confirm") }
-
-
-
-
-
-
-
-
-
-
-
-    },
-    text = {
-      OutlinedTextField(value = value, onValueChange = { v -> value = v }, singleLine = true
-
-      )
-    },
-  )
-}
-
-@Composable
-fun CredentialCard(jwt: String, onClick: (String) -> Unit, delete: () -> Unit) {
-  Card(
-    modifier = Modifier
-
-      .fillMaxWidth()
-      .padding(16.00.dp)
-      .height(100.0.dp)
-      .clickable {onClick(jwt)}
-  ) {
-    Row() {
-      val payload = tokenToPayload(jwt).jsonObject
-      //Get the actual credential type (the one at position 0 is "VerifiableCredential")
-      Text(((payload["vc"] as JsonObject)["type"] as JsonArray)[1].toString(), Modifier.padding(16.00.dp))
-
-      IconButton(onClick = delete) {
-        Icon(
-          Icons.Filled.Delete, "Delete selected credential"
-        )
-      }
-    }
-
-  }
 }
 
 fun readBinary(filename: String, application: Application) : ByteArray {

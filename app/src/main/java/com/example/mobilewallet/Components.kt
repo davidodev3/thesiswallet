@@ -45,6 +45,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 
 
 //Dialog that pops up when generating a presentation without having been redirected by the verifier.
@@ -203,4 +206,66 @@ fun Regeneration(buttonModel: ButtonModel = viewModel()) {
     buttonModel.regenerate()
 
   }) {Text("Regenerate")}
+}
+
+@Composable
+fun AddDocumentDialog(documentModel: DocumentModel, onDismissRequest: () -> Unit) {
+  var value by remember { mutableStateOf("") }
+  AlertDialog(
+    onDismissRequest = onDismissRequest,
+    title = { Text(text = "Import credential") },
+    dismissButton = {
+      TextButton(onClick = onDismissRequest) { Text("Dismiss") }
+    },
+
+    confirmButton = {
+      TextButton(onClick = {
+        documentModel.addDocument(value)
+        onDismissRequest()
+      }) { Text("Confirm") }
+    },
+    text = {
+      OutlinedTextField(value = value, onValueChange = { v -> value = v }, singleLine = true
+
+      )
+    },
+  )
+}
+
+@Composable
+fun CredentialCard(jwt: String, onClick: (String) -> Unit, delete: () -> Unit) {
+  Card(
+    modifier = Modifier
+
+
+
+
+
+
+
+
+
+
+
+
+      .fillMaxWidth()
+      .padding(16.00.dp)
+      .height(100.0.dp)
+
+      .clickable {onClick(jwt)}
+  ) {
+    Row() {
+      val payload = tokenToPayload(jwt).jsonObject
+      //Get the actual credential type (the one at position 0 is "VerifiableCredential")
+      Text(((payload["vc"] as JsonObject)["type"] as JsonArray)[1].toString(), Modifier.padding(16.00.dp))
+
+      IconButton(onClick = delete) {
+        Icon(
+
+          Icons.Filled.Delete, "Delete selected credential"
+        )
+      }
+    }
+
+  }
 }

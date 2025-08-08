@@ -191,6 +191,7 @@ suspend fun verify(presentation: String): Boolean {
   return Verifier.verifyPresentation(
     VCFormat.jwt,
     presentation,
+
     vpPolicies,
     globalPolicies,
     specificPolicies,
@@ -230,8 +231,8 @@ fun Presentation(launcher: ActivityResultLauncher<Intent>) {
 
   Row {
     ElevatedButton(onClick = {
-      coroutineScope.launch {
 
+      coroutineScope.launch {
         result = coroutineScope.async {
           credentialRequest(false, context, launcher)
         }.await()
@@ -250,8 +251,8 @@ fun Presentation(launcher: ActivityResultLauncher<Intent>) {
 
       Text("Custom request")
     }
-    ElevatedButton(onClick = {
 
+    ElevatedButton(onClick = {
       coroutineScope.launch {
         result = coroutineScope.async {
           credentialRequest(true, context, launcher)
@@ -260,8 +261,8 @@ fun Presentation(launcher: ActivityResultLauncher<Intent>) {
     }) {
       Text("Using DCAPI")
     }
-  }
 
+  }
 }
 
 @OptIn(ExperimentalDigitalCredentialApi::class, ExperimentalUuidApi::class)
@@ -269,7 +270,6 @@ suspend fun credentialRequest(
   usesAPI: Boolean, context: Context, launcher: ActivityResultLauncher<Intent>
 ): Boolean {
   val credentialManager = CredentialManager.create(context)
-
 
 
   /*OpenID for Verifiable Presentation has finally reached a final specification.
@@ -303,14 +303,14 @@ suspend fun credentialRequest(
   val sendIntent = Intent().apply {
 
     action = Intent.ACTION_SEND
-    putExtra(
-      Intent.EXTRA_TEXT, request
-    ) //Our request is a JSON string compliant with Digital Credentials API.
+    //Our request is a JSON string compliant with Digital Credentials API.
+    putExtra(Intent.EXTRA_TEXT, request)
     type = "application/json"
     setPackage("com.example.mobilewallet") //Only targets our wallet app
   }
 
   launcher.launch(sendIntent)
+
 
   return false
 }
