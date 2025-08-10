@@ -4,88 +4,74 @@ import android.app.Application
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
-import androidx.compose.ui.unit.dp
+
 import androidx.credentials.DigitalCredential
-
-
-
-
-
-
-
-
-
-
 import androidx.credentials.ExperimentalDigitalCredentialApi
 import androidx.credentials.registry.provider.RegisterCredentialsRequest
 import androidx.credentials.registry.provider.RegistryManager
-
-
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
+
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mobilewallet.ui.theme.MobileWalletTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 
+
+
+
+
+
+
+
+
+
+
+
+
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
+
 import java.util.Base64
 
 @Composable
-
 fun WalletScreen(name: String, onClick: (String) -> Unit) {
   val context = LocalContext.current
+
   var showDialog by remember { mutableStateOf(false) }
   val dom : DocumentModel = viewModel(
-
     factory = DocumentModelFactory(
-
       context.applicationContext as Application, name
     )
   )
   MobileWalletTheme {
-
     Scaffold(modifier = Modifier.fillMaxSize(), floatingActionButton = {
       AddButton(onClick = {
+
         showDialog = true
       })
     }) { innerPadding ->
@@ -94,8 +80,8 @@ fun WalletScreen(name: String, onClick: (String) -> Unit) {
 
       }
       Column(modifier = Modifier.padding(innerPadding)) {
-
         WalletName(name)
+
         DocumentList(dom, onClick)
       }
     }
@@ -104,7 +90,6 @@ fun WalletScreen(name: String, onClick: (String) -> Unit) {
 
 class DocumentModel(val name: String, private val application: Application) : AndroidViewModel(application),
   SharedPreferences.OnSharedPreferenceChangeListener {
-
   private val _walletPrefs = (application.getSharedPreferences("wallets", Context.MODE_PRIVATE))
 
   private val _documents = MutableStateFlow(
@@ -114,43 +99,31 @@ class DocumentModel(val name: String, private val application: Application) : An
 
   val documents = _documents.asStateFlow()
   init {
-
     _walletPrefs.registerOnSharedPreferenceChangeListener(this)
   }
 
   override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
     _documents.value =
       sharedPreferences.getStringSet(key, mutableSetOf<String>())?.toMutableList()
-
         ?: mutableListOf<String>()
   }
-
 
   fun removeDocument(jwt: String) {
     val doc = _documents.value.toMutableSet()
     //Remove the element from the new list
+
     doc.remove(jwt)
     with(_walletPrefs.edit()) {
       //Update preferences with new list
       putStringSet(name, doc)
-
       commit()
 
     }
   }
 
+
   @OptIn(ExperimentalDigitalCredentialApi::class)
   fun addDocument(jwt: String) {
-
-
-
-
-
-
-
-
-
-
     //Nested map
     val documentId = (tokenToPayload(jwt)["vc"] as JsonObject)["id"].toString()
 
@@ -158,13 +131,26 @@ class DocumentModel(val name: String, private val application: Application) : An
 
     try {
       //This gets executed in a background coroutine with no return value.
+
       viewModelScope.launch {
         /*Explanation: the API is experimental and does not manage data storage for now.
         So we need to register the credential in the "RegistryManager" and store the actual document somewhere else.
         Also data is treated as "opaque blobs" (binary large objects) so everything has to be binary data.*/
 
+
+
+
+
+
+
+
+
+
+
+
         registryManager.registerCredentials(request = object : RegisterCredentialsRequest(
           DigitalCredential.TYPE_DIGITAL_CREDENTIAL,
+
 
           documentId,
           jwt.encodeToByteArray(),
@@ -224,6 +210,7 @@ fun WalletName(name: String) {
     TextUnitType.Sp)
   )
 }
+
 
 fun readBinary(filename: String, application: Application) : ByteArray {
   val input = application.assets.open(filename)

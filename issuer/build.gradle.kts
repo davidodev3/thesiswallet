@@ -10,8 +10,8 @@ plugins {
 android {
   namespace = "com.example.mobileissuer"
   compileSdk = 35
-
   defaultConfig {
+
     applicationId = "com.example.mobileissuer"
     minSdk = 26
     targetSdk = 35
@@ -19,10 +19,9 @@ android {
     versionName = "1.0"
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
-
   buildTypes {
-
     release {
+
       isMinifyEnabled = false
       proguardFiles(
         getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -32,6 +31,7 @@ android {
   }
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_21
+    
     targetCompatibility = JavaVersion.VERSION_21
   }
   kotlinOptions {
@@ -83,6 +83,7 @@ dependencies {
   implementation(libs.waltid.crypto)
 
   implementation(libs.waltid.did)
+  implementation(libs.waltid.openid4vc)
   androidTestImplementation(libs.androidx.espresso.core)
   androidTestImplementation(platform(libs.androidx.compose.bom))
   androidTestImplementation(libs.androidx.ui.test.junit4)

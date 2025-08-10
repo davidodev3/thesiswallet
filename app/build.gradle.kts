@@ -1,24 +1,24 @@
 plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.androidk)
-  alias(libs.plugins.compose)
+
   alias(libs.plugins.serialization)
+
+  alias(libs.plugins.compose)
 }
 
 android {
   namespace = "com.example.mobilewallet"
   compileSdk = 35
-
   defaultConfig {
+
     applicationId = "com.example.mobilewallet"
     minSdk = 28
     targetSdk = 35
     versionCode = 1
     versionName = "1.0"
-
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
-
   buildTypes {
     release {
 
@@ -30,35 +30,35 @@ android {
     }
   }
   compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_21
 
-    targetCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_21
   }
   kotlinOptions {
-    jvmTarget = "1.8"
+    jvmTarget = "21"
   }
+
+
+
+
+
+
+
+
+
+
+
   buildFeatures {
     viewBinding = true
     compose = true
+
   }
-
-
-
-
-
-
-
-
   packaging {
     resources.excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
   }
-
 }
 
 dependencies {
-
-
-
   implementation(libs.androidx.core.ktx)
   implementation(libs.androidx.appcompat)
 
@@ -71,6 +71,7 @@ dependencies {
   implementation(platform(libs.androidx.compose.bom))
   implementation(libs.androidx.ui)
   implementation(libs.androidx.ui.graphics)
+
   implementation(libs.androidx.ui.tooling.preview)
   implementation(libs.androidx.material3)
   implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -80,8 +81,9 @@ dependencies {
   implementation(libs.waltid.verifiable.credentials)
   implementation(libs.waltid.crypto)
   implementation(libs.waltid.did)
-  androidTestImplementation(libs.androidx.junit)
 
+  implementation(libs.waltid.openid4vc)
+  androidTestImplementation(libs.androidx.junit)
   androidTestImplementation(libs.androidx.espresso.core)
   androidTestImplementation(platform(libs.androidx.compose.bom))
   androidTestImplementation(libs.androidx.ui.test.junit4)
@@ -89,6 +91,7 @@ dependencies {
   debugImplementation(libs.androidx.ui.test.manifest)
   implementation(libs.kotlinx.serialization.json)
   implementation(libs.androidx.registry.provider)
+  
   implementation(libs.androidx.registry.provider.play.services)
   implementation(libs.kotlinx.coroutines.core)
 }
