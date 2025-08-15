@@ -9,7 +9,7 @@ plugins {
 
 android {
   namespace = "com.example.mobilewallet"
-  compileSdk = 35
+  compileSdk = 36
   defaultConfig {
 
     applicationId = "com.example.mobilewallet"
@@ -93,5 +93,8 @@ dependencies {
   implementation(libs.androidx.registry.provider)
   
   implementation(libs.androidx.registry.provider.play.services)
+  implementation(platform(libs.okhttp.bom))
+  implementation(libs.okhttp)
+  implementation(libs.logging.interceptor)
   implementation(libs.kotlinx.coroutines.core)
 }

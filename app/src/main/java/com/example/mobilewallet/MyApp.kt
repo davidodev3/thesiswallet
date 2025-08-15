@@ -1,8 +1,9 @@
 package com.example.mobilewallet
 
 import android.app.Application
-import android.content.Context
+
 import id.walt.crypto.keys.KeyType
+import android.content.Context
 import id.walt.did.dids.DidService
 import id.walt.crypto.keys.jwk.JWKKey
 import kotlinx.coroutines.*
@@ -16,10 +17,11 @@ class MyApp : Application(), CoroutineScope {
   override fun onCreate() {
     super.onCreate()
     //Remove Android's default BouncyCastle implementation because walt.id uses another one
-    Security.removeProvider("BC")
+    //Security.removeProvider("BC")
     val preferences = applicationContext.getSharedPreferences("did", Context.MODE_PRIVATE)
     //Generate key and DID pair if none was found.
     if (preferences.all.isEmpty()) {
+
       launch {
         val keydid = async {
           generateKeyDid()
@@ -29,11 +31,11 @@ class MyApp : Application(), CoroutineScope {
           putString("did", resolved.second)
           putString("key", resolved.first.exportJWK())
           apply()
+
         }
       }
     }
   }
-
 }
 
 
@@ -49,7 +51,8 @@ class MyApp : Application(), CoroutineScope {
 
 suspend fun generateKeyDid() : Pair<JWKKey, String> {
   DidService.minimalInit()
-  val key = JWKKey.generate(KeyType.Ed25519) //This was supposed to be Ed25519 but apparently that does not really work without external security providers.
+
+  val key =JWKKey.generate(KeyType.Ed25519)
   val did = DidService.registerByKey("key", key).did
   return Pair(key, did)
 }
