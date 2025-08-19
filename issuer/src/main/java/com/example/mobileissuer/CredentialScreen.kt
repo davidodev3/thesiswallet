@@ -259,5 +259,4 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
       }
     }
   }
-
 }
