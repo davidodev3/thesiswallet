@@ -213,27 +213,26 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
             //TODO: rewrite better
 
             if (activity?.callingPackage == "com.example.mobilewallet") {
-              val ISSUER_BASE_URL = "https://test"
-              val metadata = OIDVCI.createDefaultProviderMetadata(baseUrl = ISSUER_BASE_URL, version = OIDVCIVersion.DRAFT11)
-              val preAuthCode = OpenID.generateAuthorizationCodeFor(Uuid.random().toString(), metadata.issuer!!, JWKKey.importJWK(credentialModel.getKey()).getOrNull()!!)
-              val offer = CredentialOffer.Draft11.Builder(ISSUER_BASE_URL).addOfferedCredentialByReference(credential).addPreAuthorizedCodeGrant(preAuthCode).build()
-              val requestUrl = OIDVCI.getCredentialOfferRequestUrl(offer)
+              val ISSUER_BASE_URL = "https://server"
+              val preAuthCode = OpenID.generateAuthorizationCodeFor(Uuid.random().toString(), ISSUER_BASE_URL, JWKKey.importJWK(credentialModel.getKey()).getOrNull()!!)
+              val requestUrl = CustomCredentialOffer(ISSUER_BASE_URL, mutableListOf(credential), preAuthCode).toOfferUrl()
               val result = Intent().apply {
                 putExtra("credential_offer", requestUrl)
               }
 
               activity.setResult(Activity.RESULT_OK, result)
+
               activity.finish()
             }
 
-            try {
+            /*try {
               content = credentialModel.generateCredential(
                 credential
               )
             } finally {
-
               loading = false
-            }
+
+            }*/
           }
 
 
@@ -251,8 +250,8 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
           showDialog = true
         }) {
           if (loading) {
-
             CircularProgressIndicator()
+
           } else {
             Text("Generate")
           }

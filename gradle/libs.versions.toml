@@ -24,35 +24,35 @@ composeBom = "2025.08.00"
 
 navigationFragmentKtx = "2.9.3"
 navigationUiKtx = "2.9.3"
+nimbusJoseJwt = "10.4.2"
 okhttpBom = "5.1.0"
 registryDigitalcredentialsPreview = "1.0.0-alpha01"
 waltidVerifiableCredentials = "0.15.0"
 navigationComposeAndroid = "2.9.3"
 navigationRuntimeAndroid = "2.9.3"
 registryDigitalCredentials = "1.0.0-alpha01"
+
 serialization = "2.2.0"
 
-
 [libraries]
-
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
+
+
+
+
+
+
+
+
+
+
+
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
-
-
-
-
-
-
-
-
-
-
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
+
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
-
-
 logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
@@ -61,9 +61,9 @@ androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecyc
 androidx-registry-digitalcredentials-preview = { module = "androidx.credentials.registry:registry-digitalcredentials-preview", version.ref = "registryDigitalcredentialsPreview" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-credentials-provider-registry-play-services = { module = "androidx.credentials:credentials-provider-registry-play-services" }
@@ -71,18 +71,16 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
+
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
-
-
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
-
-
+nimbus-jose-jwt = { module = "com.nimbusds:nimbus-jose-jwt", version.ref = "nimbusJoseJwt" }
 
 okhttp = { module = "com.squareup.okhttp3:okhttp" }
 okhttp-bom = { module = "com.squareup.okhttp3:okhttp-bom", version.ref = "okhttpBom" }
@@ -93,9 +91,9 @@ waltid-digital-credentials = { module = "id.walt.credentials:waltid-digital-cred
 waltid-did = { module = "id.walt.did:waltid-did", version.ref = "waltidVerifiableCredentials" }
 waltid-verifiable-credentials = { module = "id.walt.credentials:waltid-w3c-credentials", version.ref = "waltidVerifiableCredentials" }
 waltid-sdjwt = { module = "id.walt.sdjwt:waltid-sdjwt", version.ref = "waltidVerifiableCredentials" }
+
 androidx-navigation-compose-android = { group = "androidx.navigation", name = "navigation-compose-android", version.ref = "navigationComposeAndroid" }
 androidx-navigation-runtime-android = { group = "androidx.navigation", name = "navigation-runtime-android", version.ref = "navigationRuntimeAndroid" }
-
 androidx-registry-provider = { module = "androidx.credentials.registry:registry-provider", version.ref = "registryDigitalCredentials" }
 androidx-registry-provider-play-services = { module = "androidx.credentials.registry:registry-provider-play-services", version.ref = "registryDigitalCredentials" }
 

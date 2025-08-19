@@ -36,22 +36,24 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalClipboardManager
+
+
+
+
+
+
+
+
+
+
+
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.TextUnit
-
-
-
-
-
-
-
-
-
-
-
 import androidx.compose.ui.unit.TextUnitType
+
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
-
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -61,7 +63,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import id.walt.oid4vc.data.CredentialOffer
 import kotlinx.coroutines.Dispatchers
-
 import id.walt.oid4vc.OpenID4VCI as OIDVCI
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -70,7 +71,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import okhttp3.OkHttpClient
 import java.security.Security
-
 
 @Serializable
 class Wallet(val name: String)
@@ -308,29 +308,29 @@ fun ReceivedScreen(issued: Issued = viewModel()) {
   val offerUrl by issued.credentialOffer.collectAsStateWithLifecycle()
   var offer : CredentialOffer? by remember { mutableStateOf(null) }
   val coroutine = rememberCoroutineScope()
-
+  val clipboard = LocalClipboardManager.current
   LaunchedEffect(offerUrl) {
-    offer = OIDVCI.parseAndResolveCredentialOfferRequestUrl(offerUrl)
+    //offer = OIDVCI.parseAndResolveCredentialOfferRequestUrl(offerUrl)
 
   }
   Column {
     Text("Credential offer:", fontSize = TextUnit(38.0f, TextUnitType.Sp))
-    Text("${offer?.draft11?.credentials[0]}")
-    ElevatedButton(onClick = { coroutine.launch{performRequest()} }) { Text("Accept") }
+    Text(offerUrl)
+    ElevatedButton(onClick = {
+      clipboard.setText(AnnotatedString(offerUrl))
+      coroutine.launch{performRequest(offerUrl)}
+    }) { Text("Accept") }
   }
+
 }
 
-
-
-suspend fun performRequest() {
+//Used to handle the HTTP part of the flow to communicate with the OAuth 2.0 authorization server.
+suspend fun performRequest(url: String) {
   val client = OkHttpClient();
   withContext(Dispatchers.IO) {
-    withContext(Dispatchers.IO) {
-      val request = okhttp3.Request.Builder().url("https://www.example.org/").build()
-      val response = client.newCall(request).execute()
-      Log.i("AAAAAA", response.body.string())
-
-    }
+    val request = okhttp3.Request.Builder().url("https://www.example.org/").build()
+    val response = client.newCall(request).execute()
+    Log.i("AAAAAA", response.body.string())
 
   }
 }

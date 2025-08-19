@@ -9,7 +9,7 @@ plugins {
 
 android {
   namespace = "com.example.mobileissuer"
-  compileSdk = 35
+  compileSdk = 36
   defaultConfig {
 
     applicationId = "com.example.mobileissuer"
@@ -90,4 +90,6 @@ dependencies {
   debugImplementation(libs.androidx.ui.tooling)
   debugImplementation(libs.androidx.ui.test.manifest)
   implementation(libs.kotlinx.coroutines.android)
+  implementation(libs.nimbus.jose.jwt)
+
 }
