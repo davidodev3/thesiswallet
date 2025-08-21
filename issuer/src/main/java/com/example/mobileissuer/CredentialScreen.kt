@@ -213,7 +213,7 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
             //TODO: rewrite better
 
             if (activity?.callingPackage == "com.example.mobilewallet") {
-              val ISSUER_BASE_URL = "https://server"
+              val ISSUER_BASE_URL = "https://passengers-correspondence-mc-jacksonville.trycloudflare.com/"
               val preAuthCode = OpenID.generateAuthorizationCodeFor(Uuid.random().toString(), ISSUER_BASE_URL, JWKKey.importJWK(credentialModel.getKey()).getOrNull()!!)
               val requestUrl = CustomCredentialOffer(ISSUER_BASE_URL, mutableListOf(credential), preAuthCode).toOfferUrl()
               val result = Intent().apply {

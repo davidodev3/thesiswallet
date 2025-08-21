@@ -90,9 +90,9 @@ class CustomCredentialOffer {
 
   fun toOfferUrl() : String {
     val format = Json {explicitNulls = false}
-    val payload = "openid-credential-offer://?credential_offer=" + format.encodeToString(this)
+    val payload = format.encodeToString(this)
 
-    return URLEncoder.encode(payload, "utf-8")
+    return "openid-credential-offer://?credential_offer=" + URLEncoder.encode(payload, "utf-8")
   }
 }
 

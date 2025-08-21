@@ -61,18 +61,27 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import id.walt.oid4vc.data.CredentialOffer
+
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import id.walt.oid4vc.OpenID4VCI as OIDVCI
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+
+import kotlinx.serialization.json.jsonObject
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.net.URLDecoder
 import java.security.Security
 
 @Serializable
+
 class Wallet(val name: String)
 
 @Serializable
@@ -80,6 +89,7 @@ object Home
 
 @Serializable
 object Profile
+
 
 
 @Serializable
@@ -98,10 +108,8 @@ class MainActivity : ComponentActivity() {
     enableEdgeToEdge()
     setContent {
       MyHost()
-
     }
   }
-
 }
 
 @Composable
@@ -111,52 +119,49 @@ fun MyHost(
   issued: Issued = viewModel()
 ) {
   val offer by issued.credentialOffer.collectAsStateWithLifecycle()
-
   NavHost(modifier = modifier, navController = navController, startDestination = Home) {
     composable<Home> {
+
       MainScreen(
         onClick = { name ->
           navController.navigate(Wallet(name))
-
         },
         onProfileClick = { navController.navigate(Profile) },
       )
-
-    //If called by the verifier redirect to the selection screen
+      //If called by the verifier redirect to the selection screen
       /*if (activity != null && activity.callingPackage == "com.example.mobileverifier") {
         navController.navigate(Selection)
+
       }*/ //TODO uncomment
     }
 
     composable<Wallet> { bsEntry ->
       val wallet: Wallet = bsEntry.toRoute()
-      WalletScreen(wallet.name, onClick = { jwt ->
 
+
+
+
+
+
+
+
+
+
+
+      WalletScreen(wallet.name, onClick = { jwt ->
         navController.navigate(Credential(jwt))
       })
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
     composable<Profile> {
       ProfileScreen()
     }
-
     composable<Credential> { bsEntry ->
       val credential: Credential = bsEntry.toRoute()
       CredentialScreen(credential.credential)
     }
     composable<Selection> {
+
       SelectionScreen()
     }
   }
@@ -166,26 +171,27 @@ fun MyHost(
 fun MainScreen(
   onClick: (String) -> Unit,
   onProfileClick: () -> Unit,
+
   issued: Issued = viewModel()
 ) {
   MobileWalletTheme {
     var showDialog by remember { mutableStateOf(false) }
     val offer by issued.credentialOffer.collectAsStateWithLifecycle()
-
     Scaffold(
       modifier = Modifier.fillMaxSize(),
       floatingActionButton = {
         AddButton(onClick = {
+
           showDialog = true
         })
       }) { innerPadding ->
       if (offer != "") {
         ReceivedScreen()
-
       } else {
         if (showDialog) {
           AddWalletDialog(onDismissRequest = { showDialog = false })
         }
+
         Column() {
           Greeting(
             name = "Android", modifier = Modifier.padding(innerPadding)
@@ -195,33 +201,32 @@ fun MainScreen(
           ListColumn(onClick = onClick)
           IconButton(onClick = onProfileClick) {
             Icon(
+
               Icons.Filled.Person, "Profile"
             )
           }
           HorizontalDivider()
           RequestCredentialsButton()
-          Text("Credential offer: $offer")
-
         }
-      }
 
+      }
     }
+
   }
 }
 
 class WalletModel(application: Application) : AndroidViewModel(application),
   SharedPreferences.OnSharedPreferenceChangeListener {
-
-    private val _walletPrefs = (application.getSharedPreferences("wallets", Context.MODE_PRIVATE))
+  private val _walletPrefs = (application.getSharedPreferences("wallets", Context.MODE_PRIVATE))
   private val _wallets = MutableStateFlow(_walletPrefs.all.keys.toMutableList())
   val wallets = _wallets.asStateFlow()
+
 
   init {
     _walletPrefs.registerOnSharedPreferenceChangeListener(this)
   }
 
   override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
-
     _wallets.value = sharedPreferences.all.keys.toMutableList()
   }
 
@@ -231,22 +236,21 @@ class WalletModel(application: Application) : AndroidViewModel(application),
       putStringSet(name, mutableSetOf())
       commit()
     }
-
   }
+
+
+
+
+
+
+
+
+
+
 
   fun removeWallet(name: String) {
     with(_walletPrefs.edit()) {
       remove(name)
-
-
-
-
-
-
-
-
-
-
 
       commit()
     }
@@ -261,13 +265,13 @@ class WalletModel(application: Application) : AndroidViewModel(application),
 @Composable
 fun RequestCredentialsButton(
   profileModel: ProfileModel = viewModel(),
-
   issued: Issued = viewModel()
 ) {
   val launcher =
     rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { value ->
       if (value.resultCode == Activity.RESULT_OK) {
         issued.updateOffer(value.data?.getStringExtra("credential_offer") ?: "")
+
       }
     }
   ElevatedButton(onClick = {
@@ -275,19 +279,15 @@ fun RequestCredentialsButton(
     val intent = Intent().apply {
       action = Intent.ACTION_SEND
       putExtra(Intent.EXTRA_TEXT, profileModel.getDid())
-
       type = "https://schema.org/text"
-
       setPackage("com.example.mobileissuer") //Only targets our issuer app
 
     }
-
     launcher.launch(intent)
   }) {
     Text("Request credentials")
   }
 }
-
 
 class Issued : ViewModel() {
 
@@ -305,32 +305,59 @@ class Issued : ViewModel() {
 @Composable
 fun ReceivedScreen(issued: Issued = viewModel()) {
 
-  val offerUrl by issued.credentialOffer.collectAsStateWithLifecycle()
-  var offer : CredentialOffer? by remember { mutableStateOf(null) }
+  val url by issued.credentialOffer.collectAsStateWithLifecycle()
+  var offer: CustomCredentialOffer? by remember { mutableStateOf(null) }
   val coroutine = rememberCoroutineScope()
-  val clipboard = LocalClipboardManager.current
-  LaunchedEffect(offerUrl) {
-    //offer = OIDVCI.parseAndResolveCredentialOfferRequestUrl(offerUrl)
+  var clipboard = LocalClipboardManager.current
+  LaunchedEffect(url) {
+    val decoded = URLDecoder.decode(url, "utf-8")
 
+    //Only gets what is after the first =, i.e. the URL encoded credential offer JSON.
+    val payload = decoded.substring(decoded.indexOf('=') + 1)
+    offer = Json.decodeFromString(payload)
   }
   Column {
     Text("Credential offer:", fontSize = TextUnit(38.0f, TextUnitType.Sp))
-    Text(offerUrl)
+    Text(offer?.credentialConfigurationIds.toString())
     ElevatedButton(onClick = {
-      clipboard.setText(AnnotatedString(offerUrl))
-      coroutine.launch{performRequest(offerUrl)}
+      clipboard.setText(AnnotatedString(url))
+
+      coroutine.launch { performRequest(offer!!) }
     }) { Text("Accept") }
   }
 
 }
 
 //Used to handle the HTTP part of the flow to communicate with the OAuth 2.0 authorization server.
-suspend fun performRequest(url: String) {
-  val client = OkHttpClient();
-  withContext(Dispatchers.IO) {
-    val request = okhttp3.Request.Builder().url("https://www.example.org/").build()
-    val response = client.newCall(request).execute()
-    Log.i("AAAAAA", response.body.string())
+suspend fun performRequest(offered: CustomCredentialOffer) {
+  val client = OkHttpClient()
 
+  val metadataRequest = Request.Builder()
+    .url(OIDVCI.getOpenIdProviderMetadataUrl(offered.credentialIssuer))
+    .build()
+  withContext(Dispatchers.IO) {
+    val response = async {
+
+
+
+
+
+
+
+
+
+
+
+      client.newCall(metadataRequest).execute()
+    }
+    val preAuthorizedCode = offered.grants?.get("urn:ietf:params:oauth:grant-type:pre-authorized_code")!!.preAuthorizedCode
+
+    val requestParams = "" //TODO
+    val requestBody = requestParams.toRequestBody(
+      "application/x-www-form-urlencoded".toMediaType()
+    )
+    val metadata = response.await().body.string()
+    val tokenEndpoint = Json.parseToJsonElement(metadata).jsonObject["token_endpoint"].toString()
+    val tokenRequest = Request.Builder().post(requestBody).url(tokenEndpoint).build()
   }
 }
