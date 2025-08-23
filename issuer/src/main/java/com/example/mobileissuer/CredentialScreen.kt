@@ -32,11 +32,11 @@ import com.example.mobileissuer.ui.theme.MobileWalletTheme
 import id.walt.crypto.keys.jwk.JWKKey
 import id.walt.oid4vc.OpenID4VC as OpenID
 
-import id.walt.oid4vc.OpenID4VCI as OIDVCI
-import id.walt.oid4vc.OpenID4VCIVersion as OIDVCIVersion
-import id.walt.oid4vc.data.CredentialOffer
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
+
+
+
 
 
 
@@ -60,9 +60,8 @@ class CredentialModel(context: Application) : AndroidViewModel(context) {
   this gets updated once per application start. Also any change does not really impact the UI.
   So in short no preference listener.*/
   private val prefs = context.getSharedPreferences("did", Context.MODE_PRIVATE)
-
-
   //Mapping of data to be passed to the generated credential
+
   private val _mapping = MutableStateFlow(mutableStateMapOf<String, String>())
   val mapping = _mapping.asStateFlow()
 
@@ -71,29 +70,28 @@ class CredentialModel(context: Application) : AndroidViewModel(context) {
   }
 
   fun getKey(): String {
-
     return prefs.getString("key", "") ?: ""
+
   }
 
   fun updateMap(key: String, value: String) {
-
     _mapping.value[key] = value
   }
 
   suspend fun generateCredential(type: String): String {
-
     val jwt = viewModelScope.async {
       generateCredential(type, mapping.value, getDid(), getKey())
+
     }
     return jwt.await()
   }
-
 }
 
 @OptIn(ExperimentalUuidApi::class)
 
 @Composable
 fun CredentialScreen(credential: String, credentialModel: CredentialModel = viewModel()) {
+
   var showDialog by remember { mutableStateOf(false) }
   var content by remember { mutableStateOf("") }
   var loading by remember { mutableStateOf(false) }
@@ -101,9 +99,9 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
   val mapping by credentialModel.mapping.collectAsStateWithLifecycle()
   val coroutineScope = rememberCoroutineScope()
   val activity = LocalActivity.current
-
   /*Passing a map to generate a credential is the most convenient way
   but since we also need to show text inputs in real time
+
   we need some support variables to store the data, the map gets populated under the hood*/
   if (credential == "UniversityDegree") {
     fields = {
@@ -111,9 +109,9 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
       var name by remember { mutableStateOf("") }
       OutlinedTextField(value = type, onValueChange = { v: String ->
         mapping["type"] = v
-
         type = v
       }, label = {Text("Type")})
+
       OutlinedTextField(value = name, onValueChange = { v: String ->
         mapping["name"] = v
         name = v
@@ -121,9 +119,9 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
     }
   } else if (credential == "Visa") {
     fields = {
-
       var firstName by remember { mutableStateOf("John") }
       var lastName by remember { mutableStateOf("Doe") }
+
       var gender by remember { mutableStateOf("M") }
       var nationality by remember { mutableStateOf("Canadian") }
       var dateOfBirth by remember { mutableStateOf("1/1/1970") }
@@ -131,12 +129,14 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
       var visaType by remember { mutableStateOf("Tourism") }
       var entryNumber by remember { mutableStateOf("Single") }
       var duration by remember { mutableStateOf("90") }
-
       var purposeOfVisit by remember { mutableStateOf("Tourism") }
       OutlinedTextField(value = firstName, onValueChange = { v: String ->
+
         mapping["firstName"] = v
         firstName = v
       }, label = {Text("First name")})
+
+
 
 
 
@@ -213,7 +213,7 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
             //TODO: rewrite better
 
             if (activity?.callingPackage == "com.example.mobilewallet") {
-              val ISSUER_BASE_URL = "https://passengers-correspondence-mc-jacksonville.trycloudflare.com/"
+              val ISSUER_BASE_URL = "http://10.0.2.2:3000"
               val preAuthCode = OpenID.generateAuthorizationCodeFor(Uuid.random().toString(), ISSUER_BASE_URL, JWKKey.importJWK(credentialModel.getKey()).getOrNull()!!)
               val requestUrl = CustomCredentialOffer(ISSUER_BASE_URL, mutableListOf(credential), preAuthCode).toOfferUrl()
               val result = Intent().apply {

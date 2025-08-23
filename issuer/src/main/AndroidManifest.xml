@@ -26,6 +26,14 @@
             <data android:mimeType="https://schema.org/text"/>
          </intent-filter>
       </activity>
-   </application>
+      <service
+          android:name=".IssuanceService"
+          android:enabled="true"
+          android:exported="true">
+         <intent-filter>
 
+            <action android:name="com.example.mobileissuer.IssuanceService" />
+         </intent-filter>
+   </service>
+   </application>
 </manifest>
