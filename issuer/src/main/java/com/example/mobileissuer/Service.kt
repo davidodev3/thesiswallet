@@ -9,6 +9,8 @@ import android.os.IBinder
 import android.os.Message
 import android.os.Messenger
 import android.util.Log
+import androidx.core.content.edit
+import kotlinx.serialization.json.Json
 
 class IssuanceService : Service() {
 
@@ -19,21 +21,45 @@ class IssuanceService : Service() {
     val service: IssuanceService,
     val applicationContext : Context = context.applicationContext,
   ) : Handler() {
-    override fun handleMessage(msg: Message) {
-      val token = msg.data.getString("token")
 
-      Log.i("AAAAAA", "Token: $token")
+    override fun handleMessage(msg: Message) {
+      val token = msg.data.getString("authorization")
+      val prefs = applicationContext.getSharedPreferences("session", Context.MODE_PRIVATE)
+      val session = tokenToPayload(token!!)["sub"].toString().removeSurrounding("\"")
       val res = Message.obtain()
-      res.data.putString("credential", "credenziale")
+
+      res.data.putString(
+        "credentials",
+        Json.encodeToString(arrayOf(
+
+          (mutableMapOf("credential" to (prefs.getString(session, "") ?: "")))
+        ))
+      )
       msg.replyTo.send(res)
+      prefs.edit(commit = true) {
+
+
+
+
+
+
+
+
+
+
+
+        remove(session)
+        clear() //TODO remove
+      }
+
       super.handleMessage(msg)
     }
   }
 
   override fun onBind(intent: Intent): IBinder? {
-
     Log.i("AAAAAA", "Bindato")
     iBinder = Messenger(HandlerIncoming(this, this))
     return iBinder.binder
   }
+
 }

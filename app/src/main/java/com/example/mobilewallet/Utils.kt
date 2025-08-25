@@ -1,59 +1,68 @@
 package com.example.mobilewallet
 
 import android.app.Activity
+import android.app.Application
 
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.Message
+
 import android.os.Messenger
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.Contextual
 import id.walt.oid4vc.OpenID4VCI as OIDVCI
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.json.Json
+
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaType
-
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+
+import java.util.Base64
 
 //Custom class for compliance to OpenID for Verifiable Credential Issuance Draft 16
 @Serializable
 class CustomCredentialOffer {
 
+
+
+
+
+
+
+
+
+
+
   @SerialName("credential_issuer")
 
   var credentialIssuer: String
+
   @SerialName("credential_configuration_ids")
   var credentialConfigurationIds: List<String>
   @Contextual
   var grants: Map<String, PreAuthorizedFlow>? = null
 
-
-
-
-
-
-
-
-
-
-
   constructor(issuer: String, credentialConfigs: List<String>, preAuthorizedCode: String) {
-
     this.credentialIssuer = issuer
-
     this.credentialConfigurationIds = credentialConfigs
-    this.grants = mutableMapOf("urn:ietf:params:oauth:grant-type:pre-authorized_code" to
+    this.grants = mutableMapOf(
+
+      "urn:ietf:params:oauth:grant-type:pre-authorized_code" to
       PreAuthorizedFlow(preAuthorizedCode = preAuthorizedCode)
     )
   }
@@ -61,8 +70,8 @@ class CustomCredentialOffer {
 
 @Serializable
 class PreAuthorizedFlow(
-
   @SerialName("tx_code")
+
   var txCode: TxCode? = null,
   @SerialName("pre-authorized_code")
   var preAuthorizedCode: String,
@@ -72,6 +81,7 @@ class PreAuthorizedFlow(
 
 @Serializable
 
+
 class TxCode(
   @SerialName("input_mode")
   var inputMode: String? = null,
@@ -80,7 +90,7 @@ class TxCode(
 )
 
 //Used to handle the HTTP part of the flow to communicate with the OAuth 2.0 authorization server.
-suspend fun performRequest(offered: CustomCredentialOffer, context: Activity) {
+suspend fun performRequest(offered: CustomCredentialOffer, context: Activity, model: IssuedCredentialModel) {
 
   val client = OkHttpClient()
 
@@ -101,6 +111,7 @@ suspend fun performRequest(offered: CustomCredentialOffer, context: Activity) {
             "&pre-authorized_code=$preAuthorizedCode" //TODO
     val requestBody = requestParams.toRequestBody(
       "application/x-www-form-urlencoded".toMediaType()
+
     )
     val metadata = response.await().body.string()
     Log.i("AAAAAA", metadata)
@@ -110,48 +121,79 @@ suspend fun performRequest(offered: CustomCredentialOffer, context: Activity) {
     val tokenRequest = Request.Builder().post(requestBody).url(tokenEndpoint).build()
     val tokenResponse = async {
       client.newCall(tokenRequest).execute()
-    }
 
-    val accessToken = tokenResponse.await().body.string()
+    }
+    val accessToken = Json.parseToJsonElement(tokenResponse.await().body.string()).jsonObject["access_token"].toString().removeSurrounding("\"")
 
     Log.i("AAAAAA", accessToken)
+    Looper.prepare()
     var messenger: Messenger?
+    val handler = HandlerReply(Looper.getMainLooper(), model)
+    val replier = Messenger(handler)
     var bound = false
 
     val connection = object : ServiceConnection {
       override fun onServiceConnected(name: ComponentName, binder: IBinder) {
         messenger = Messenger(binder)
-
         val msg = Message.obtain(null, 1, 0, 0)
-        msg.data.putString("token", accessToken)
+
+
+
+
+
+
+
+
+
+
+
+        msg.data.putString("authorization", accessToken)
+        msg.data.putString("credential_configuration_id", offered.credentialConfigurationIds[0])
+        msg.replyTo = replier
         messenger?.send(msg)
+
         bound = true
-        //TODO: set replyto
       }
+
       override fun onServiceDisconnected(name: ComponentName?) {
         messenger = null
         bound = false
-
       }
     }
-
     val intent = Intent()
+
     intent.setClassName(
-
-
-
-
-
-
-
-
-
-
-
       "com.example.mobileissuer",
       "com.example.mobileissuer.IssuanceService"
     )
-
     context.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+    Looper.loop()
   }
 }
+
+
+class HandlerReply(thread: Looper, private val model : IssuedCredentialModel) : Handler(thread) {
+  override fun handleMessage(msg: Message) {
+    val res = Json.parseToJsonElement(msg.data.getString("credentials", "")).jsonArray
+    Log.i("AAAAAA", "Reply: $res")
+    model.updateIssuedCredential(res[0].jsonObject["credential"].toString().removeSurrounding("\""))
+    super.handleMessage(msg)
+  }
+}
+
+
+fun readBinary(filename: String, application: Application) : ByteArray {
+  val input = application.assets.open(filename)
+  val binary = ByteArray(input.available())
+  input.read(binary)
+  input.close()
+  return binary
+}
+
+fun tokenToPayload(jwt: String) : JsonObject {
+
+  val decoder = Base64.getUrlDecoder()
+  //The actual content of the encoded JSON is in the second part, the one after the first dot. Decode the JWT and then convert the resulting JSON string into an object.
+  return Json.parseToJsonElement(decoder.decode(jwt.split(".")[1]).decodeToString()).jsonObject
+}
+

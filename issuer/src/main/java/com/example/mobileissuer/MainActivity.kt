@@ -16,12 +16,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
@@ -35,8 +37,6 @@ import kotlinx.serialization.Serializable
 class Credential(val type: String)
 @Serializable
 object Home
-
-
 
 
 
@@ -68,21 +68,30 @@ fun MyHost(
   NavHost(modifier = modifier, navController = navController, startDestination = Home) {
     composable<Home> {
       MobileWalletTheme {
+        val model : CredentialModel = viewModel()
+        val clipboard = LocalClipboardManager.current
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+
           Column() {
             Heading(
-
               modifier = Modifier.padding(innerPadding)
             )
             CredentialCard("Visa") { navController.navigate(Credential("Visa")) }
             CredentialCard("University Degree") { navController.navigate(Credential("UniversityDegree")) }
             Regeneration()
+            ElevatedButton(onClick = {
+              clipboard.setText(AnnotatedString(model.getDid()))
+
+            }) { Text("DID") }
+            ElevatedButton(onClick = {
+              clipboard.setText(AnnotatedString(model.getKey()))
+            }) { Text("JWK pair") }
           }
         }
       }
     }
-
     composable<Credential> { bsEntry ->
+
       val credential: Credential = bsEntry.toRoute()
       CredentialScreen(credential.type)
     }
@@ -91,6 +100,7 @@ fun MyHost(
 
 //TODO: Remove
 class ButtonModel(application: Application) : AndroidViewModel(application) {
+
 
   private val _preferences = application.getSharedPreferences("did", Context.MODE_PRIVATE)
 

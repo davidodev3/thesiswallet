@@ -10,14 +10,18 @@ import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import java.net.URLEncoder
+import kotlinx.serialization.json.JsonObject
 
+import kotlinx.serialization.json.jsonObject
+import java.net.URLEncoder
+import java.util.Base64
 import kotlin.time.Duration.Companion.days
 
-suspend fun generateCredential(
+fun generateCredential(
   type: String,
   map: Map<String, String>,
   issuer: String,
+
   key: String
 ): String {
   val credential = CredentialBuilder().apply {
@@ -27,37 +31,36 @@ suspend fun generateCredential(
 
     if (type == "Visa") {
       addType("VerifiableAttestation")
+
       validFor(Integer.parseInt(map["duration"] ?: "90").days)
     }
     validFromNow() //Validity starts on issuance date and time for other credentials.
     addType(type)
-
     issuerDid = issuer
+
+
+
+
+
+
+
+
+
+
 
     subjectDid = "did:key:z6MkmLUYGGZXTCAqq7PtavWYTD93B8mw3dkjL5e1PSqQRPTr" //TODO Hardcoded
     useCredentialSubject(map.toJsonObject())
-
-
-
-
-
-
-
-
-
-
-
-
   }.buildW3C()
 
-  val signed = credential.signJws(
+  val signed = credential.signJwsBlocking(
 
-    JWKKey.importJWK(key).getOrNull()!!,  //The JWK was exported as a string to be saved as SharedPreference.
+    JWKKey.importJWKBlocking(key).getOrNull()!!,  //The JWK was exported as a string to be saved as SharedPreference.
     issuer,
     subjectDid = "did:key:z6MkmLUYGGZXTCAqq7PtavWYTD93B8mw3dkjL5e1PSqQRPTr" //TODO
   )
   return signed
 }
+
 
 //Generate a key using Ed25519 algorithm and a DID using that key.
 suspend fun generateKeyDid() : Pair<JWKKey, String> {
@@ -68,6 +71,7 @@ suspend fun generateKeyDid() : Pair<JWKKey, String> {
   return Pair(key, did)
 }
 
+
 //Custom class for compliance to OpenID for Verifiable Credential Issuance Draft 16
 @Serializable
 class CustomCredentialOffer {
@@ -77,6 +81,7 @@ class CustomCredentialOffer {
   @SerialName("credential_configuration_ids")
   var credentialConfigurationIds: List<String>
   @Contextual
+
   var grants: Map<String, PreAuthorizedFlow>? = null
 
   constructor(issuer: String, credentialConfigs: List<String>, preAuthorizedCode: String) {
@@ -86,6 +91,7 @@ class CustomCredentialOffer {
     this.grants = mutableMapOf("urn:ietf:params:oauth:grant-type:pre-authorized_code" to
       PreAuthorizedFlow(preAuthorizedCode = preAuthorizedCode)
     )
+
   }
 
   fun toOfferUrl() : String {
@@ -101,7 +107,6 @@ class PreAuthorizedFlow(
   @SerialName("tx_code")
   var txCode: TxCode? = null,
   @SerialName("pre-authorized_code")
-
   var preAuthorizedCode: String,
   @SerialName("authorization_server")
   var authorizationServer: String? = null
@@ -111,7 +116,13 @@ class PreAuthorizedFlow(
 class TxCode(
   @SerialName("input_mode")
   var inputMode: String? = null,
-
   var length: Int? = null,
   var description: String? = null
 )
+
+fun tokenToPayload(jwt: String) : JsonObject {
+
+  val decoder = Base64.getUrlDecoder()
+  //The actual content of the encoded JSON is in the second part, the one after the first dot. Decode the JWT and then convert the resulting JSON string into an object.
+  return Json.parseToJsonElement(decoder.decode(jwt.split(".")[1]).decodeToString()).jsonObject
+}

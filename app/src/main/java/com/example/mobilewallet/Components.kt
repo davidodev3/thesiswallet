@@ -35,23 +35,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
+
+
+
+
+
+
+
+
+
+
+
 import androidx.compose.ui.unit.TextUnit
-
-
-
-
-
-
-
-
-
-
-
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.AndroidViewModel
 
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -60,7 +61,6 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
-
 
 //Dialog that pops up when generating a presentation without having been redirected by the verifier.
 @Composable
@@ -119,84 +119,98 @@ fun AddButton(onClick: () -> Unit) {
 fun CardWallet(name: String, onClick: (String) -> Unit, delete: () -> Unit) {
   Card(
     modifier = Modifier
-
-
-
-
-
-
       .fillMaxWidth()
+
+
       .padding(16.00.dp)
       .height(100.0.dp)
       .clickable {onClick(name)}
   ) {
     Row() {
-
       Text(name, Modifier.padding(16.00.dp))
       IconButton(onClick = delete) {
         Icon(
           Icons.Filled.Delete, "Delete selected wallet"
+
         )
-
-
-
-
-
-
-
-
-
-
-
       }
     }
   }
-
 }
 
+
+
+
+
+
+
+
+
+
+
 @Composable
-fun ListColumn(walletModel: WalletModel = viewModel(), onClick: (String) -> Unit) {
+fun ListColumn(walletModel: WalletModel = viewModel(), issuedCredentialModel: IssuedCredentialModel = viewModel(), onClick: (String) -> Unit) {
   val wallets by walletModel.wallets.collectAsStateWithLifecycle()
+
+  val credential by issuedCredentialModel.credential.collectAsStateWithLifecycle()
+  val application = LocalContext.current
+  var callback = onClick
 
   if (wallets.isEmpty()) {
     Text("You don't have any wallets yet.")
   }
 
   else {
+
     LazyColumn {
       items(wallets) { name ->
-        CardWallet(name, onClick) {
+        if (credential != "") {
+          val dom : DocumentModel = viewModel(
+            factory = DocumentModelFactory(
+              application.applicationContext as Application, name
+            )
+          )
+          callback = { s ->
+
+            dom.addDocument(credential)
+            issuedCredentialModel.updateIssuedCredential("")
+            onClick(s)
+          }
+        }
+
+        CardWallet(name, callback) {
           walletModel.removeWallet(name)
         }
+
       }
     }
   }
-
 }
 
 @Composable
 fun AddWalletDialog(walletModel: WalletModel = viewModel(), onDismissRequest: () -> Unit) {
   var value by remember { mutableStateOf("") }
   AlertDialog(
+
     onDismissRequest = onDismissRequest,
     title = { Text(text = "Add wallet") },
     dismissButton = {
-
       TextButton(onClick = onDismissRequest) { Text("Dismiss") }
     },
     confirmButton = {
       TextButton(onClick = {
         walletModel.addWallet(value)
         onDismissRequest()
+
       }) { Text("Confirm") }
     },
     text = {
-
       OutlinedTextField(value = value, onValueChange = { v -> value = v }
       )
     },
   )
 }
+
 
 //TODO: Remove
 class ButtonModel(application: Application) : AndroidViewModel(application) {
@@ -207,6 +221,7 @@ class ButtonModel(application: Application) : AndroidViewModel(application) {
       val keydid = async {
         generateKeyDid()
       }
+
       with(_preferences.edit()) {
         val resolved = keydid.await()
         putString("did", resolved.second)
@@ -216,14 +231,27 @@ class ButtonModel(application: Application) : AndroidViewModel(application) {
       }
     }
   }
+
 }
 
 @Composable
 fun Regeneration(buttonModel: ButtonModel = viewModel()) {
-  ElevatedButton(onClick = {
 
+
+
+
+
+
+
+
+
+
+
+
+  ElevatedButton(onClick = {
     buttonModel.regenerate()
   }) {Text("Regenerate")}
+
 }
 
 @Composable
@@ -231,23 +259,11 @@ fun AddDocumentDialog(documentModel: DocumentModel, onDismissRequest: () -> Unit
   var value by remember { mutableStateOf("") }
   AlertDialog(
     onDismissRequest = onDismissRequest,
-
     title = { Text(text = "Import credential") },
     dismissButton = {
+
       TextButton(onClick = onDismissRequest) { Text("Dismiss") }
     },
-
-
-
-
-
-
-
-
-
-
-
-
     confirmButton = {
       TextButton(onClick = {
         documentModel.addDocument(value)
@@ -255,36 +271,35 @@ fun AddDocumentDialog(documentModel: DocumentModel, onDismissRequest: () -> Unit
         onDismissRequest()
       }) { Text("Confirm") }
     },
+
     text = {
       OutlinedTextField(value = value, onValueChange = { v -> value = v }, singleLine = true
 
       )
     },
   )
-
 }
-
 @Composable
 fun CredentialCard(jwt: String, onClick: (String) -> Unit, delete: () -> Unit) {
+
   Card(
     modifier = Modifier
       .fillMaxWidth()
       .padding(16.00.dp)
       .height(100.0.dp)
-
       .clickable {onClick(jwt)}
   ) {
     Row() {
       val payload = tokenToPayload(jwt).jsonObject
+
       //Get the actual credential type (the one at position 0 is "VerifiableCredential")
       Text(((payload["vc"] as JsonObject)["type"] as JsonArray)[1].toString(), Modifier.padding(16.00.dp))
-
       IconButton(onClick = delete) {
         Icon(
-
           Icons.Filled.Delete, "Delete selected credential"
         )
       }
     }
   }
+
 }

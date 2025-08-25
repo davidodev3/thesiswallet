@@ -36,38 +36,32 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mobilewallet.ui.theme.MobileWalletTheme
 import kotlinx.coroutines.flow.MutableStateFlow
-
-
-
-
-
-
-
-
-
-
-
-
-
 import kotlinx.coroutines.flow.asStateFlow
+
+
+
+
+
+
+
+
+
+
+
 import kotlinx.coroutines.launch
-
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonObject
 
-import java.util.Base64
 
 @Composable
 fun WalletScreen(name: String, onClick: (String) -> Unit) {
   val context = LocalContext.current
-
   var showDialog by remember { mutableStateOf(false) }
   val dom : DocumentModel = viewModel(
     factory = DocumentModelFactory(
       context.applicationContext as Application, name
     )
   )
+
   MobileWalletTheme {
     Scaffold(modifier = Modifier.fillMaxSize(), floatingActionButton = {
       AddButton(onClick = {
@@ -75,9 +69,10 @@ fun WalletScreen(name: String, onClick: (String) -> Unit) {
         showDialog = true
       })
     }) { innerPadding ->
-      if (showDialog) {
-        AddDocumentDialog(dom) { showDialog = false }
 
+      if (showDialog) {
+
+        AddDocumentDialog(dom) { showDialog = false }
       }
       Column(modifier = Modifier.padding(innerPadding)) {
         WalletName(name)
@@ -86,6 +81,7 @@ fun WalletScreen(name: String, onClick: (String) -> Unit) {
       }
     }
   }
+
 }
 
 class DocumentModel(val name: String, private val application: Application) : AndroidViewModel(application),
@@ -95,6 +91,7 @@ class DocumentModel(val name: String, private val application: Application) : An
   private val _documents = MutableStateFlow(
     _walletPrefs.getStringSet(name, mutableSetOf<String>())?.toMutableList()
       ?: mutableListOf<String>()
+
   )
 
   val documents = _documents.asStateFlow()
@@ -104,6 +101,7 @@ class DocumentModel(val name: String, private val application: Application) : An
 
   override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
     _documents.value =
+
       sharedPreferences.getStringSet(key, mutableSetOf<String>())?.toMutableList()
         ?: mutableListOf<String>()
   }
@@ -113,6 +111,7 @@ class DocumentModel(val name: String, private val application: Application) : An
     //Remove the element from the new list
 
     doc.remove(jwt)
+
     with(_walletPrefs.edit()) {
       //Update preferences with new list
       putStringSet(name, doc)
@@ -121,8 +120,8 @@ class DocumentModel(val name: String, private val application: Application) : An
     }
   }
 
-
   @OptIn(ExperimentalDigitalCredentialApi::class)
+
   fun addDocument(jwt: String) {
     //Nested map
     val documentId = (tokenToPayload(jwt)["vc"] as JsonObject)["id"].toString()
@@ -131,11 +130,12 @@ class DocumentModel(val name: String, private val application: Application) : An
 
     try {
       //This gets executed in a background coroutine with no return value.
-
       viewModelScope.launch {
         /*Explanation: the API is experimental and does not manage data storage for now.
         So we need to register the credential in the "RegistryManager" and store the actual document somewhere else.
         Also data is treated as "opaque blobs" (binary large objects) so everything has to be binary data.*/
+
+
 
 
 
@@ -209,21 +209,4 @@ fun WalletName(name: String) {
   Text(name, fontSize = TextUnit(38.0f,
     TextUnitType.Sp)
   )
-}
-
-
-fun readBinary(filename: String, application: Application) : ByteArray {
-  val input = application.assets.open(filename)
-  val binary = ByteArray(input.available())
-  input.read(binary)
-  input.close()
-  return binary
-
-}
-
-
-fun tokenToPayload(jwt: String) : JsonObject {
-  val decoder = Base64.getUrlDecoder()
-  //The actual content of the encoded JSON is in the second part, the one after the first dot. Decode the JWT and then convert the resulting JSON string into an object.
-  return Json.parseToJsonElement(decoder.decode(jwt.split(".")[1]).decodeToString()).jsonObject
 }
