@@ -5,17 +5,17 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,28 +30,31 @@ import com.example.mobilewallet.ui.theme.MobileWalletTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+
 import kotlinx.serialization.json.JsonArray
 
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
 
+
+
+
+
+
+
+
+
+
+
 @Composable
-fun SelectionScreen(selectionModel: SelectionModel = viewModel()) {
-
-
-
-
-
-
-
-
-
-
-
+fun SelectionScreen(selectionModel: SelectionModel = viewModel(), credentialModel: CredentialModel = viewModel()) {
   val loading = selectionModel.loading.collectAsStateWithLifecycle()
-  val activity = LocalActivity.current
-  MobileWalletTheme {
 
+  val activity = LocalActivity.current
+
+  MobileWalletTheme {
     Scaffold { innerPadding ->
       Column {
         Text("Selection", modifier = Modifier.padding(innerPadding))
@@ -59,29 +62,45 @@ fun SelectionScreen(selectionModel: SelectionModel = viewModel()) {
           items(selectionModel.getWalletCredentials()) { credential ->
             val payload = tokenToPayload(credential.second).jsonObject
 
+            val request = activity?.intent?.getStringExtra(Intent.EXTRA_TEXT)
+
+            //Decode JSON to Object
+            val decoded = Json.decodeFromString<CredentialRequestOptions>(request!!)
             //Get the actual credential type (the one at position 0 is "VerifiableCredential")
-            val type = ((payload["vc"] as JsonObject)["type"] as JsonArray)[1].toString()
+            val type = ((payload["vc"] as JsonObject)["type"] as JsonArray)[1].toString().removeSurrounding("\"")
+            for (request in decoded.digital.requests) {
+              val dataPayload = tokenToPayload(request.data)
+              val decodedPayload = Json.decodeFromJsonElement<CustomAuthorizationRequest>(dataPayload)
 
-            Card(
-              Modifier
-                .fillMaxWidth()
-                .padding(16.00.dp)
-                .height(100.0.dp)
-                .clickable(onClick = {
-                  val result = Intent().apply {
-                    //Key "vp_token" as per OpenID for Verifiable Presentations
-                    putExtra("vp_token", credential.second)
+              for (requestedCredential in decodedPayload.query.credentials) {
+                for (list in requestedCredential.meta.typeValues) {
+                  Log.i("AAAAAA", list.toString())
+                  if (list.contains(type)) {
+                    Card(
+                      Modifier
+                        .fillMaxWidth()
+                        .padding(16.00.dp)
+                        .height(100.0.dp)
 
+                        .clickable(onClick = {
+                          val result = Intent().apply {
+                            //Key "vp_token" as per OpenID for Verifiable Presentations
+                            putExtra("vp_token", credentialModel.generatePresentation(credential.second))
+                          }
+                          activity.setResult(Activity.RESULT_OK, result)
+                          activity.finish()
+                        })
+                    ) {
+
+                      Text("${credential.first}: $type")
+                    }
                   }
-                  activity?.setResult(Activity.RESULT_OK, result)
-                  activity?.finish()
-                })
-            ) {
-              Text("${credential.first}: $type")
+
+                }
+              }
             }
           }
         }
-
       }
     }
   }
@@ -90,7 +109,6 @@ fun SelectionScreen(selectionModel: SelectionModel = viewModel()) {
 class SelectionModel(context: Application) : AndroidViewModel(context) {
   private val _walletPrefs = context.getSharedPreferences("wallets", Context.MODE_PRIVATE)
   private var _loading = MutableStateFlow(true)
-
 
   val loading = _loading.asStateFlow()
 
@@ -101,9 +119,9 @@ class SelectionModel(context: Application) : AndroidViewModel(context) {
       viewModelScope.launch {
         _walletPrefs.all.keys.forEach { key ->
           _walletPrefs.getStringSet(key, mutableSetOf())?.forEach { value ->
-
             result += Pair(key, value)
           }
+
         }
       }
     } finally {

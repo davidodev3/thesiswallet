@@ -86,9 +86,9 @@ class CredentialModel(context: Application) : AndroidViewModel(context) {
     _mapping.value[key] = value
   }
 
-  suspend fun generateCredential(type: String): String {
+  suspend fun generateCredential(type: String, subject: String): String {
     val jwt = viewModelScope.async {
-      generateCredential(type, mapping.value, getDid(), getKey())
+      generateCredential(type, mapping.value, getDid(), getKey(), subject, null)
 
     }
 
@@ -217,41 +217,42 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
             //TODO: rewrite better
             try {
               content = credentialModel.generateCredential(
-                credential
+                credential, activity?.intent?.getStringExtra(Intent.EXTRA_TEXT) ?: "did:key:placeholder"
               )
             } finally {
               loading = false
 
               if (activity?.callingPackage == "com.example.mobilewallet") {
                 val ISSUER_BASE_URL = "http://10.0.2.2:3000"
-                val sessionId = Uuid.random().toString()
-                val preAuthCode = OpenID.generateAuthorizationCodeFor(sessionId, ISSUER_BASE_URL, JWKKey.importJWK(credentialModel.getKey()).getOrNull()!!)
+                val session = Uuid.random().toString()
+                coroutineScope.launch { addSessionRequest(session, ISSUER_BASE_URL ) }
+                val preAuthCode = OpenID.generateAuthorizationCodeFor(session, ISSUER_BASE_URL, JWKKey.importJWK(credentialModel.getKey()).getOrNull()!!)
                 val requestUrl = CustomCredentialOffer(ISSUER_BASE_URL, mutableListOf(credential), preAuthCode).toOfferUrl()
                 val result = Intent().apply {
                   putExtra("credential_offer", requestUrl)
                 }
-                credentialModel.saveSession(sessionId, content)
 
+                credentialModel.saveSession(session, content)
                 activity.setResult(Activity.RESULT_OK, result)
                 activity.finish()
               }
             }
+
+
+
+
+
+
+
+
+
+
+
           }
-
-
-
-
-
-
-
-
-
-
-
           showDialog = true
         }) {
-          if (loading) {
 
+          if (loading) {
             CircularProgressIndicator()
           } else {
             Text("Generate")
@@ -260,4 +261,5 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
       }
     }
   }
+
 }

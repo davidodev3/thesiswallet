@@ -52,8 +52,7 @@ class CredentialModel(context: Application) : AndroidViewModel(context) {
 
   @OptIn(ExperimentalUuidApi::class)
 
-  suspend fun generatePresentation(credential: String): String {
-    DidService.minimalInit()
+  fun generatePresentation(credential: String): String {
     val presentation = PresentationBuilder().apply {
       did = _prefs.getString("did", "")
       nonce = Uuid.random().toString() //Generate a random string every time to be used as nonce
@@ -61,8 +60,8 @@ class CredentialModel(context: Application) : AndroidViewModel(context) {
     }
 
     val key = _prefs.getString("key", "") ?: ""
+    return presentation.buildAndSignBlocking(JWKKey.importJWKBlocking(key).getOrNull()!!)
 
-    return presentation.buildAndSign(JWKKey.importJWK(key).getOrNull()!!)
   }
 
   //TODO: Remove, for debug and development purposes only
@@ -71,6 +70,7 @@ class CredentialModel(context: Application) : AndroidViewModel(context) {
   }
 
 }
+
 
 @Composable
 fun CredentialScreen(credential: String, credentialModel: CredentialModel = viewModel()) {
@@ -127,4 +127,3 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
 
   }
 }
-

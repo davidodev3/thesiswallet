@@ -3,6 +3,8 @@ plugins {
   alias(libs.plugins.compose)
 
   alias(libs.plugins.androidk)
+
+  alias(libs.plugins.serialization)
 }
 
 android {

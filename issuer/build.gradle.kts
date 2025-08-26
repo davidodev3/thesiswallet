@@ -92,4 +92,6 @@ dependencies {
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.nimbus.jose.jwt)
 
+  implementation(platform(libs.okhttp.bom))
+  implementation(libs.okhttp)
 }

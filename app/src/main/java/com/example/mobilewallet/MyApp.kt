@@ -22,38 +22,41 @@ class MyApp : Application(), CoroutineScope {
     Security.addProvider(BouncyCastleProviderSingleton.getInstance())
     val preferences = applicationContext.getSharedPreferences("did", Context.MODE_PRIVATE)
 
+    launch {
+      DidService.minimalInit()
+    }
     //Generate key and DID pair if none was found.
     if (preferences.all.isEmpty()) {
       launch {
         val keydid = async {
           generateKeyDid()
         }
+
         with(preferences.edit()) {
           val resolved = keydid.await()
           putString("did", resolved.second)
 
           putString("key", resolved.first.exportJWK())
 
+
+
+
+
+
+
+
+
+
+
           apply()
         }
       }
-
-
-
-
-
-
-
-
-
-
 
     }
   }
 }
 
 suspend fun generateKeyDid() : Pair<JWKKey, String> {
-  DidService.minimalInit()
   val key =JWKKey.generate(KeyType.Ed25519)
   val did = DidService.registerByKey("key", key).did
   return Pair(key, did)
