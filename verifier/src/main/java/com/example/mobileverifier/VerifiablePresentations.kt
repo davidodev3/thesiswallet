@@ -66,3 +66,18 @@ class DCAPIMeta (
 
   val typeValues: List<List<String>>
 )
+
+@Serializable
+class A
+
+@Serializable
+
+class CustomAuthorizationResponse(
+  val response: String
+) {
+  companion object {
+    fun fromCredentialMapping(token: Map<String, List<String>>) : CustomAuthorizationResponse {
+      return CustomAuthorizationResponse("vp_token=${Json.encodeToString(token)}")
+    }
+  }
+}

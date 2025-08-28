@@ -84,3 +84,42 @@ class DCAPIMeta (
 
   val typeValues: List<List<String>>
 )
+
+interface Credential {
+  val id: String
+  val type: String
+}
+
+interface DigitalCredential : Credential {
+  val protocol: String
+  val data: CustomAuthorizationResponse
+}
+
+@Serializable
+class CustomDigitalCredential(
+
+  override val id: String,
+  override val type: String,
+  override val protocol: String,
+  override val data: CustomAuthorizationResponse
+
+) : DigitalCredential {
+  companion object {
+    fun userAgentAllowsProtocol(protocol: String): Boolean {
+      return protocol == "openid4vp-v1-unsigned"
+    }
+  }
+}
+
+
+@Serializable
+class CustomAuthorizationResponse(
+  val response: String
+) {
+  companion object {
+    fun fromCredentialMapping(token: Map<String, List<String>>) : CustomAuthorizationResponse {
+      return CustomAuthorizationResponse("vp_token=${Json.encodeToString(token)}")
+    }
+  }
+
+}

@@ -84,24 +84,34 @@ fun SelectionScreen(selectionModel: SelectionModel = viewModel(), credentialMode
 
                         .clickable(onClick = {
                           val result = Intent().apply {
-                            //Key "vp_token" as per OpenID for Verifiable Presentations
-                            putExtra("vp_token", credentialModel.generatePresentation(credential.second))
+                            val presentation = credentialModel.generatePresentation(credential.second)
+                            val mapping = mutableMapOf(requestedCredential.credentialId to mutableListOf(presentation))
+                            val authorization = CustomAuthorizationResponse.fromCredentialMapping(mapping)
+                            val response = CustomDigitalCredential(
+                              requestedCredential.credentialId,
+                              "",
+                              "openid4vp-v1-unsigned",
+
+                              authorization
+                            )
+                            putExtra(Intent.EXTRA_TEXT, Json.encodeToString(response))
                           }
                           activity.setResult(Activity.RESULT_OK, result)
                           activity.finish()
+
                         })
                     ) {
 
                       Text("${credential.first}: $type")
                     }
                   }
-
                 }
               }
             }
           }
         }
       }
+
     }
   }
 }
@@ -127,7 +137,17 @@ class SelectionModel(context: Application) : AndroidViewModel(context) {
     } finally {
       _loading.value = false
     }
+
+
+
+
+
+
+
+
+
+
+
     return result
   }
-
 }

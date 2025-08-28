@@ -5,10 +5,10 @@
       <SelectionState runConfigName="Wallet">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="Issuer">
+      <SelectionState runConfigName="Verifier">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="Verifier">
+      <SelectionState runConfigName="issuer">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

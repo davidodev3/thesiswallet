@@ -52,37 +52,40 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 
 
-import com.example.mobileverifier.ui.theme.MobileWalletTheme
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import com.example.mobileverifier.ui.theme.MobileWalletTheme
 
 class MainActivity : ComponentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
 
+    super.onCreate(savedInstanceState)
 
     enableEdgeToEdge()
     setContent {
       MobileWalletTheme {
-        var vpToken by rememberSaveable { mutableStateOf("") }
-
+        var response by rememberSaveable { mutableStateOf("") }
         var overallSuccess by rememberSaveable { mutableStateOf(false) }
         var showDialog by rememberSaveable { mutableStateOf(false) }
         val coroutine = rememberCoroutineScope()
-        val getToken =
 
+        val getToken =
           rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { value ->
             if (value.resultCode == Activity.RESULT_OK) {
-              vpToken = value.data?.getStringExtra("vp_token") ?: ""
+              val extra = value.data?.getStringExtra(Intent.EXTRA_TEXT) ?: ""
+              response = Json.decodeFromString<CustomDigitalCredential>(response).data.response
             }
           }
 
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+
           if (showDialog) {
             ResultDialog(overallSuccess) { showDialog = false
 
-              vpToken = "" //Resets the vpToken to default
+              response = "" //Resets the vpToken to default
             }
           }
           Column(
@@ -94,14 +97,13 @@ class MainActivity : ComponentActivity() {
 
           ) {
             Heading()
-            if (vpToken == "") {
+            if (response == "") {
               Text("Paste a JWT below for verification")
               Fields { fieldInput ->
                 try {
                   //Launch a coroutine that verifies the presentation and then show the results in the dialog.
                   coroutine.launch {
                     overallSuccess = coroutine.async {
-
                       verify(fieldInput)
                     }.await()
                   }
@@ -109,19 +111,19 @@ class MainActivity : ComponentActivity() {
                   showDialog = true
                 }
               }
+
               Text("Or request a verifiable presentation from the wallet.")
               Presentation(getToken)
-
             } else {
+              val vpToken = Json.parseToJsonElement(response.removePrefix("vp_token=")).jsonObject["credential1"].toString().removeSurrounding("")
               Text("Received token. ${vpToken.take(30)}...") //Add ellipsis for long strings
               ElevatedButton(onClick = {
                 try {
                   //Launch a coroutine that verifies the presentation and then show the results in the dialog.
                   coroutine.launch {
+
                     overallSuccess = coroutine.async {
-
                       verify(vpToken)
-
                     }.await()
                   }
                 } finally {
@@ -129,24 +131,24 @@ class MainActivity : ComponentActivity() {
                 }
               }) { Text("Verify") }
             }
+
           }
         }
-
       }
     }
   }
 
+
+
+
+
+
+
+
+
+
+
 }
-
-
-
-
-
-
-
-
-
-
 
 @Composable
 
@@ -159,9 +161,9 @@ fun Heading(modifier: Modifier = Modifier) {
 
 @Composable
 fun Fields(onSubmit: (String) -> Unit) {
+
   var fieldInput by rememberSaveable { mutableStateOf("") }
   Column {
-
     OutlinedTextField(value = fieldInput, onValueChange = { v -> fieldInput = v })
     OutlinedButton(onClick = { onSubmit(fieldInput) }) { Text("Verify") }
   }
@@ -169,9 +171,9 @@ fun Fields(onSubmit: (String) -> Unit) {
 
 @Composable
 fun ResultDialog(success: Boolean, onDismissRequest: () -> Unit) {
+
   AlertDialog(
     onDismissRequest = onDismissRequest,
-
     title = { Text(text = "Verification:") },
     dismissButton = {
       TextButton(onClick = onDismissRequest) { Text("Dismiss") }
@@ -179,9 +181,9 @@ fun ResultDialog(success: Boolean, onDismissRequest: () -> Unit) {
     confirmButton = {
       TextButton(onClick = {
         onDismissRequest()
+
       }) { Text("Confirm") }
     },
-
     text = {
       Text(if (success) "SUCCESS" else "FAILURE")
     },
@@ -199,6 +201,7 @@ fun Presentation(launcher: ActivityResultLauncher<Intent>) {
   Row {
     ElevatedButton(onClick = {
       coroutineScope.launch {
+
         result = coroutineScope.async {
           credentialRequest(false, context, launcher)
 
@@ -207,11 +210,10 @@ fun Presentation(launcher: ActivityResultLauncher<Intent>) {
     }) {
       Text("Custom request")
     }
-
     ElevatedButton(onClick = {
+
       coroutineScope.launch {
         result = coroutineScope.async {
-
           credentialRequest(true, context, launcher)
         }.await()
       }
@@ -219,4 +221,5 @@ fun Presentation(launcher: ActivityResultLauncher<Intent>) {
       Text("Using DCAPI")
     }
   }
+
 }

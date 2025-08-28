@@ -84,7 +84,7 @@ object Profile
 
 
 @Serializable
-class Credential(val credential: String)
+class Credentials(val credential: String)
 
 @Serializable
 object Login
@@ -132,7 +132,7 @@ fun MyHost(
       WalletScreen(wallet.name, onClick = { jwt ->
         issued.updateIssuedCredential("")
 
-        navController.navigate(Credential(jwt))
+        navController.navigate(Credentials(jwt))
       })
     }
 
@@ -153,7 +153,7 @@ fun MyHost(
     }
 
     composable<Credential> { bsEntry ->
-      val credential: Credential = bsEntry.toRoute()
+      val credential: Credentials = bsEntry.toRoute()
       CredentialScreen(credential.credential)
     }
 
