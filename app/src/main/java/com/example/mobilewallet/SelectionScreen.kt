@@ -69,10 +69,10 @@ fun SelectionScreen(selectionModel: SelectionModel = viewModel(), credentialMode
             //Get the actual credential type (the one at position 0 is "VerifiableCredential")
             val type = ((payload["vc"] as JsonObject)["type"] as JsonArray)[1].toString().removeSurrounding("\"")
             for (request in decoded.digital.requests) {
-              val dataPayload = tokenToPayload(request.data)
-              val decodedPayload = Json.decodeFromJsonElement<CustomAuthorizationRequest>(dataPayload)
+              val dataPayload = request.data
 
-              for (requestedCredential in decodedPayload.query.credentials) {
+
+              for (requestedCredential in dataPayload.query.credentials) {
                 for (list in requestedCredential.meta.typeValues) {
                   Log.i("AAAAAA", list.toString())
                   if (list.contains(type)) {

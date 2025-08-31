@@ -17,14 +17,14 @@ class DigitalCredentialRequestOptions(val requests: List<DigitalCredentialGetReq
 
 @Serializable
 class DigitalCredentialGetRequest(
-  private val protocol: String = "openid4vp-v1-unsigned", val data: String
+  private val protocol: String = "openid4vp-v1-unsigned", val data: CustomAuthorizationRequest
 )
 
 @Serializable
 
 class CredentialRequestOptions(val digital: DigitalCredentialRequestOptions) {
   companion object {
-    fun fromAuthorizationRequests(requests: List<String>): CredentialRequestOptions {
+    fun fromAuthorizationRequests(requests: List<CustomAuthorizationRequest>): CredentialRequestOptions {
       val req = mutableListOf<DigitalCredentialGetRequest>()
       for (request in requests) {
         req.add(DigitalCredentialGetRequest(data = request))

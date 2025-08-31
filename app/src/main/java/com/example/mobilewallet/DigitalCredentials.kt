@@ -13,7 +13,7 @@ class DigitalCredentialRequestOptions(val requests: List<DigitalCredentialGetReq
 class DigitalCredentialGetRequest(
 
   private val protocol: String = "openid4vp-v1-unsigned",
-  val data: String
+  val data: CustomAuthorizationRequest
 )
 
 @Serializable

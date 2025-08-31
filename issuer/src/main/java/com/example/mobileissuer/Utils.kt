@@ -1,11 +1,14 @@
 package com.example.mobileissuer
 
+import android.util.Log
 import id.walt.crypto.keys.KeyType
 
 import id.walt.crypto.keys.jwk.JWKKey
 import id.walt.crypto.utils.JsonUtils.toJsonObject
 import id.walt.did.dids.DidService
 import id.walt.w3c.CredentialBuilder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -155,12 +158,15 @@ fun tokenToPayload(jwt: String): JsonObject {
 }
 
 suspend fun addSessionRequest(id: String, serverUrl: String) {
-
   val client = OkHttpClient()
+
   val request = Request.Builder()
+
     .post("session=$id".toRequestBody("application/x-www-form-urlencoded".toMediaType()))
     .url("$serverUrl/session")
     .build()
+  withContext(Dispatchers.IO) {
+    client.newCall(request).execute()
+  }
 
-  client.newCall(request).execute()
 }

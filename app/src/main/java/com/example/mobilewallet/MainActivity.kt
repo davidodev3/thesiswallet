@@ -152,7 +152,7 @@ fun MyHost(
       ProfileScreen()
     }
 
-    composable<Credential> { bsEntry ->
+    composable<Credentials> { bsEntry ->
       val credential: Credentials = bsEntry.toRoute()
       CredentialScreen(credential.credential)
     }

@@ -8,10 +8,11 @@
        android:roundIcon="@mipmap/ic_launcher_round"
        android:supportsRtl="true"
        android:theme="@style/Theme.MobileWallet"
-       android:name=".MyApp">
+       android:name=".MyApp"
+       android:usesCleartextTraffic="true">
       <activity
-          android:name=".MainActivity"
 
+          android:name=".MainActivity"
           android:exported="true"
           android:label="@string/title_activity_main"
           android:theme="@style/Theme.MobileWallet">
@@ -20,8 +21,8 @@
             <category android:name="android.intent.category.LAUNCHER" />
          </intent-filter>
          <intent-filter>
-            <action android:name="android.intent.action.SEND"/>
 
+            <action android:name="android.intent.action.SEND"/>
             <category android:name="android.intent.category.DEFAULT"/>
             <data android:mimeType="https://schema.org/text"/>
          </intent-filter>
@@ -30,10 +31,21 @@
           android:name=".IssuanceService"
           android:enabled="true"
           android:exported="true">
-         <intent-filter>
 
+         <intent-filter>
             <action android:name="com.example.mobileissuer.IssuanceService" />
          </intent-filter>
    </service>
    </application>
+
+
+
+
+
+
+
+
+
+
+
 </manifest>

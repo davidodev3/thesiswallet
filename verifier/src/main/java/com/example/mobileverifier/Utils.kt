@@ -80,7 +80,7 @@ suspend fun credentialRequest(
           DCAPIMeta(listOf(listOf("UniversityDegree")))
         ))
       )
-    ).toUnsignedJWT())
+    ))
 
   )
 
