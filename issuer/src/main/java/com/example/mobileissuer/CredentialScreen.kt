@@ -114,8 +114,8 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
 
   if (credential == "UniversityDegree") {
     fields = {
-      var type by remember { mutableStateOf("") }
-      var name by remember { mutableStateOf("") }
+      var type by remember { mutableStateOf("BSc") }
+      var name by remember { mutableStateOf("Computer Engineering") }
       OutlinedTextField(value = type, onValueChange = { v: String ->
         mapping["type"] = v
         type = v
