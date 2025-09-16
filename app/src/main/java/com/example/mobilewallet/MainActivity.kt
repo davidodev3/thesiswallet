@@ -37,22 +37,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-
-
-
-
-
-
-
-
-
-
-
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
-
 import androidx.compose.ui.unit.TextUnit
+
+
+
 import androidx.compose.ui.unit.TextUnitType
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
@@ -60,8 +51,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,9 +62,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.net.URLDecoder
 
-
 @Serializable
-
 class Wallet(val name: String)
 
 @Serializable
@@ -91,6 +80,7 @@ object Login
 
 @Serializable
 object Selection
+
 
 class MainActivity : ComponentActivity() {
 
@@ -126,32 +116,17 @@ fun MyHost(
         navController.navigate(Selection)
       }*/ //TODO uncomment
     }
-
     composable<Wallet> { bsEntry ->
       val wallet: Wallet = bsEntry.toRoute()
       WalletScreen(wallet.name, onClick = { jwt ->
         issued.updateIssuedCredential("")
-
         navController.navigate(Credentials(jwt))
+
       })
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
     composable<Profile> {
       ProfileScreen()
     }
-
     composable<Credentials> { bsEntry ->
       val credential: Credentials = bsEntry.toRoute()
       CredentialScreen(credential.credential)
@@ -166,13 +141,17 @@ fun MyHost(
 
 @Composable
 fun MainScreen(
+
+
+
   onClick: (String) -> Unit,
+
 
   onProfileClick: () -> Unit,
   issued: IssuedCredentialModel = viewModel()
 ) {
-
   MobileWalletTheme {
+
     var showDialog by remember { mutableStateOf(false) }
     val offer by issued.offer.collectAsStateWithLifecycle()
     val credential by issued.credential.collectAsStateWithLifecycle()
@@ -180,18 +159,21 @@ fun MainScreen(
     Log.i("AAAAAA", "Credenzialis: $credential")
     Scaffold(
       modifier = Modifier.fillMaxSize(),
+
       floatingActionButton = {
 
         AddButton(onClick = {
           showDialog = true
         })
+
       }) { innerPadding ->
       if (activity?.callingPackage == "com.example.mobileverifier") {
         SelectionScreen()
-      } else {
+      }
+      else {
+
         if (offer != "" && credential == "") {
           ReceivedScreen()
-
         } else {
           if (showDialog) {
             AddWalletDialog(onDismissRequest = { showDialog = false })
@@ -199,26 +181,24 @@ fun MainScreen(
           Column() {
             Greeting(
               name = "Android", modifier = Modifier.padding(innerPadding)
+
             )
             Subtitle()
-
             ListColumn(onClick = onClick)
             IconButton(onClick = onProfileClick) {
               Icon(
                 Icons.Filled.Person, "Profile"
-
               )
             }
             HorizontalDivider()
-            RequestCredentialsButton()
 
+            RequestCredentialsButton()
           }
         }
       }
     }
   }
 }
-
 
 class WalletModel(application: Application) : AndroidViewModel(application),
 
@@ -236,35 +216,21 @@ class WalletModel(application: Application) : AndroidViewModel(application),
     _wallets.value = sharedPreferences.all.keys.toMutableList()
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
   fun addWallet(name: String) {
     with(_walletPrefs.edit()) {
       putStringSet(name, mutableSetOf())
-
       commit()
     }
 
   }
-
 
   fun removeWallet(name: String) {
     with(_walletPrefs.edit()) {
       remove(name)
-
       commit()
     }
   }
+
 
   override fun onCleared() {
     super.onCleared()
@@ -275,14 +241,17 @@ class WalletModel(application: Application) : AndroidViewModel(application),
 @Composable
 fun RequestCredentialsButton(
   profileModel: ProfileModel = viewModel(),
+
+
+
   issued: IssuedCredentialModel = viewModel()
 ) {
 
   val launcher =
     rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { value ->
       if (value.resultCode == Activity.RESULT_OK) {
-
         issued.updateOffer(value.data?.getStringExtra("credential_offer") ?: "")
+
       }
     }
   ElevatedButton(onClick = {
@@ -291,8 +260,8 @@ fun RequestCredentialsButton(
       putExtra(Intent.EXTRA_TEXT, profileModel.getDid())
       type = "https://schema.org/text"
       setPackage("com.example.mobileissuer") //Only targets our issuer app
-
     }
+
     launcher.launch(intent)
   }) {
     Text("Request credentials")
@@ -301,8 +270,8 @@ fun RequestCredentialsButton(
 
 class IssuedCredentialModel : ViewModel() {
 
-
   private var _offer = MutableStateFlow("")
+
   private var _credential = MutableStateFlow("")
   var offer = _offer.asStateFlow()
   var credential = _credential.asStateFlow()
@@ -311,8 +280,8 @@ class IssuedCredentialModel : ViewModel() {
     _credential.value = new
   }
 
-
   fun updateOffer(newCredentialOffer: String) {
+
     _offer.value = newCredentialOffer
   }
 }
@@ -321,8 +290,8 @@ class IssuedCredentialModel : ViewModel() {
 fun ReceivedScreen(issued: IssuedCredentialModel = viewModel()) {
   val url by issued.offer.collectAsStateWithLifecycle()
   var offer: CustomCredentialOffer? by remember { mutableStateOf(null) }
-
   val activity = LocalActivity.current
+
   val coroutine = rememberCoroutineScope()
   var clipboard = LocalClipboardManager.current
   val credential by issued.credential.collectAsStateWithLifecycle()
@@ -331,28 +300,17 @@ fun ReceivedScreen(issued: IssuedCredentialModel = viewModel()) {
     //Only gets what is after the first =, i.e. the URL encoded credential offer JSON.
     val payload = decoded.substring(decoded.indexOf('=') + 1)
     offer = Json.decodeFromString(payload)
-
   }
+
   Column {
     Text("Credential offer:", fontSize = TextUnit(38.0f, TextUnitType.Sp))
     Text(offer?.credentialConfigurationIds.toString())
-
-
-
-
-
-
-
-
-
-
-
-
     ElevatedButton(onClick = {
       clipboard.setText(AnnotatedString(url))
       coroutine.launch { performRequest(offer!!, activity!!, issued) }
-
     }) { Text("Accept") }
     Text("Issued: $credential")
   }
+
+
 }

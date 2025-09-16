@@ -33,30 +33,23 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 
 import androidx.lifecycle.viewmodel.CreationExtras
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.mobilewallet.ui.theme.MobileWalletTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-
-
-
-
-
-
-
-
-
-
-
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mobilewallet.ui.theme.MobileWalletTheme
+
+
+
 
 
 @Composable
 fun WalletScreen(name: String, onClick: (String) -> Unit) {
+
   val context = LocalContext.current
   var showDialog by remember { mutableStateOf(false) }
-  val dom : DocumentModel = viewModel(
+  val dom: DocumentModel = viewModel(
     factory = DocumentModelFactory(
       context.applicationContext as Application, name
     )
@@ -65,28 +58,29 @@ fun WalletScreen(name: String, onClick: (String) -> Unit) {
   MobileWalletTheme {
     Scaffold(modifier = Modifier.fillMaxSize(), floatingActionButton = {
       AddButton(onClick = {
-
         showDialog = true
       })
     }) { innerPadding ->
 
       if (showDialog) {
-
         AddDocumentDialog(dom) { showDialog = false }
       }
       Column(modifier = Modifier.padding(innerPadding)) {
         WalletName(name)
-
         DocumentList(dom, onClick)
       }
+
     }
+
   }
 
 }
 
-class DocumentModel(val name: String, private val application: Application) : AndroidViewModel(application),
+class DocumentModel(val name: String, private val application: Application) :
+  AndroidViewModel(application),
   SharedPreferences.OnSharedPreferenceChangeListener {
   private val _walletPrefs = (application.getSharedPreferences("wallets", Context.MODE_PRIVATE))
+
 
   private val _documents = MutableStateFlow(
     _walletPrefs.getStringSet(name, mutableSetOf<String>())?.toMutableList()
@@ -95,13 +89,15 @@ class DocumentModel(val name: String, private val application: Application) : An
   )
 
   val documents = _documents.asStateFlow()
+
   init {
+
     _walletPrefs.registerOnSharedPreferenceChangeListener(this)
+
   }
 
   override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
     _documents.value =
-
       sharedPreferences.getStringSet(key, mutableSetOf<String>())?.toMutableList()
         ?: mutableListOf<String>()
   }
@@ -115,8 +111,8 @@ class DocumentModel(val name: String, private val application: Application) : An
     with(_walletPrefs.edit()) {
       //Update preferences with new list
       putStringSet(name, doc)
-      commit()
 
+      commit()
     }
   }
 
@@ -128,52 +124,26 @@ class DocumentModel(val name: String, private val application: Application) : An
 
     val registryManager = RegistryManager.create(application)
 
-    try {
-      //This gets executed in a background coroutine with no return value.
-      viewModelScope.launch {
-        /*Explanation: the API is experimental and does not manage data storage for now.
-        So we need to register the credential in the "RegistryManager" and store the actual document somewhere else.
-        Also data is treated as "opaque blobs" (binary large objects) so everything has to be binary data.*/
+    /*The JWT is unique for each issued credential so we can directly save that.
+    SQLite was definitely an option to store the actual JSON data (decoded from the issued JWT),
+    but probably we need to work with JSON/JWT more so using SharedPreferences to store strings seems more efficient.*/
 
+    val doc = _documents.value.toMutableSet()
+    doc.add(jwt)
+    with(_walletPrefs.edit()) {
 
+      putStringSet(name, doc)
+      commit()
 
-
-
-
-
-
-
-
-
-
-
-
-        registryManager.registerCredentials(request = object : RegisterCredentialsRequest(
-          DigitalCredential.TYPE_DIGITAL_CREDENTIAL,
-
-
-          documentId,
-          jwt.encodeToByteArray(),
-          readBinary("openidvp.wasm", application) //Matcher provided by Google on their repository
-        ) {})
-      }
-    } finally {
-      /*The JWT is unique for each issued credential so we can directly save that.
-      SQLite was definitely an option to store the actual JSON data (decoded from the issued JWT),
-      but probably we need to work with JSON/JWT more so using SharedPreferences to store strings seems more efficient.*/
-
-      val doc = _documents.value.toMutableSet()
-      doc.add(jwt)
-      with (_walletPrefs.edit()) {
-        putStringSet(name, doc)
-        commit()
-      }
     }
   }
 
 
   override fun onCleared() {
     super.onCleared()
+
+
+
     _walletPrefs.unregisterOnSharedPreferenceChangeListener(this)
   }
 }
@@ -182,7 +152,7 @@ class DocumentModel(val name: String, private val application: Application) : An
 class DocumentModelFactory(private val application: Application, private val name: String) :
   ViewModelProvider.Factory {
 
-    override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+  override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
     @Suppress("UNCHECKED_CAST") return DocumentModel(name, application) as T
   }
 }
@@ -197,7 +167,7 @@ fun DocumentList(documentModel: DocumentModel, onClick: (String) -> Unit) {
   } else {
     LazyColumn {
       items(documents) { jwt ->
-        CredentialCard(jwt, onClick) {documentModel.removeDocument(jwt)}
+        CredentialCard(jwt, onClick) { documentModel.removeDocument(jwt) }
       }
     }
   }
@@ -206,7 +176,12 @@ fun DocumentList(documentModel: DocumentModel, onClick: (String) -> Unit) {
 
 @Composable
 fun WalletName(name: String) {
-  Text(name, fontSize = TextUnit(38.0f,
-    TextUnitType.Sp)
+  Text(
+
+    name, fontSize = TextUnit(
+      38.0f,
+      TextUnitType.Sp
+
+    )
   )
 }

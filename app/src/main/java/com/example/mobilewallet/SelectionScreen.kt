@@ -38,26 +38,20 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
 
-
-
-
-
-
-
-
-
-
-
 @Composable
 fun SelectionScreen(selectionModel: SelectionModel = viewModel(), credentialModel: CredentialModel = viewModel()) {
   val loading = selectionModel.loading.collectAsStateWithLifecycle()
 
+
+
   val activity = LocalActivity.current
+
 
   MobileWalletTheme {
     Scaffold { innerPadding ->
       Column {
         Text("Selection", modifier = Modifier.padding(innerPadding))
+
         LazyColumn {
           items(selectionModel.getWalletCredentials()) { credential ->
             val payload = tokenToPayload(credential.second).jsonObject
@@ -66,44 +60,48 @@ fun SelectionScreen(selectionModel: SelectionModel = viewModel(), credentialMode
 
             //Decode JSON to Object
             val decoded = Json.decodeFromString<CredentialRequestOptions>(request!!)
+
+
             //Get the actual credential type (the one at position 0 is "VerifiableCredential")
             val type = ((payload["vc"] as JsonObject)["type"] as JsonArray)[1].toString().removeSurrounding("\"")
+
             for (request in decoded.digital.requests) {
               val dataPayload = request.data
-
-
               for (requestedCredential in dataPayload.query.credentials) {
                 for (list in requestedCredential.meta.typeValues) {
                   Log.i("AAAAAA", list.toString())
                   if (list.contains(type)) {
+
                     Card(
                       Modifier
                         .fillMaxWidth()
                         .padding(16.00.dp)
                         .height(100.0.dp)
-
                         .clickable(onClick = {
                           val result = Intent().apply {
+
                             val presentation = credentialModel.generatePresentation(credential.second)
+
                             val mapping = mutableMapOf(requestedCredential.credentialId to mutableListOf(presentation))
+
                             val authorization = CustomAuthorizationResponse.fromCredentialMapping(mapping)
+
                             val response = CustomDigitalCredential(
                               requestedCredential.credentialId,
                               "",
                               "openid4vp-v1-unsigned",
-
                               authorization
+
                             )
                             putExtra(Intent.EXTRA_TEXT, Json.encodeToString(response))
                           }
                           activity.setResult(Activity.RESULT_OK, result)
                           activity.finish()
-
                         })
                     ) {
-
                       Text("${credential.first}: $type")
                     }
+
                   }
                 }
               }
@@ -111,9 +109,9 @@ fun SelectionScreen(selectionModel: SelectionModel = viewModel(), credentialMode
           }
         }
       }
-
     }
   }
+
 }
 
 class SelectionModel(context: Application) : AndroidViewModel(context) {
@@ -123,6 +121,7 @@ class SelectionModel(context: Application) : AndroidViewModel(context) {
   val loading = _loading.asStateFlow()
 
   fun getWalletCredentials(): List<Pair<String, String>> {
+
     val result = mutableListOf<Pair<String, String>>()
     //This operation could take a while so is delegated to a coroutine.
     try {
@@ -131,23 +130,12 @@ class SelectionModel(context: Application) : AndroidViewModel(context) {
           _walletPrefs.getStringSet(key, mutableSetOf())?.forEach { value ->
             result += Pair(key, value)
           }
-
         }
+
       }
     } finally {
       _loading.value = false
     }
-
-
-
-
-
-
-
-
-
-
-
     return result
   }
 }

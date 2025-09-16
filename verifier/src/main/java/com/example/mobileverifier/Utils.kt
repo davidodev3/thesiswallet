@@ -37,30 +37,22 @@ suspend fun verify(presentation: String): Boolean {
     presentation,
     vpPolicies,
     globalPolicies,
-
-
-
-
-
-
-
-
-
-
-
     specificPolicies,
   )
   Log.i("AAAAAA", results.results.toString())
-
   return results.overallSuccess()
+
+
+
 }
+
 
 @OptIn(ExperimentalDigitalCredentialApi::class, ExperimentalUuidApi::class)
 suspend fun credentialRequest(
   usesAPI: Boolean, context: Context, launcher: ActivityResultLauncher<Intent>
 ): Boolean {
-  val credentialManager = CredentialManager.create(context)
 
+  val credentialManager = CredentialManager.create(context)
 
   /*OpenID for Verifiable Presentation has finally reached a final specification.
     For compatibility with the Android API manually generate the request JSON.
@@ -69,9 +61,9 @@ suspend fun credentialRequest(
 
   //Building request
   val options = CredentialRequestOptions.fromAuthorizationRequests(
+
     listOf(CustomAuthorizationRequest(
       nonce = Uuid.random().toString(),
-
       responseType = "vp_token",
       query = DCQLQuery(
         listOf(DCQLCredential(
@@ -79,6 +71,7 @@ suspend fun credentialRequest(
           "jwt_vc_json",
           DCAPIMeta(listOf(listOf("UniversityDegree")))
         ))
+
       )
     ))
 
@@ -86,19 +79,16 @@ suspend fun credentialRequest(
 
   val request = Json.encodeToString(options)
   //This uses the experimental Digital Credentials API.
-  //TODO: working implementation?
-
   if (usesAPI) {
     val digitalCredentialOptions = listOf(GetDigitalCredentialOption(request))
-    val getCredentialRequest = GetCredentialRequest(digitalCredentialOptions)
 
+    val getCredentialRequest = GetCredentialRequest(digitalCredentialOptions)
     try {
       val credResult = credentialManager.getCredential(
         context, getCredentialRequest
       )
       val credential = credResult.credential
       if (credential is DigitalCredential) {
-
         return verify(credential.credentialJson) //TODO jwt
       }
 

@@ -37,23 +37,13 @@ import java.util.Base64
 //Custom class for compliance to OpenID for Verifiable Credential Issuance Draft 16
 @Serializable
 class CustomCredentialOffer {
-
-
-
-
-
-
-
-
-
-
-
   @SerialName("credential_issuer")
-
   var credentialIssuer: String
-
   @SerialName("credential_configuration_ids")
   var credentialConfigurationIds: List<String>
+
+
+
   @Contextual
   var grants: Map<String, PreAuthorizedFlow>? = null
 
@@ -130,42 +120,33 @@ suspend fun performRequest(offered: CustomCredentialOffer, context: Activity, mo
     var messenger: Messenger?
     val handler = HandlerReply(Looper.getMainLooper(), model)
     val replier = Messenger(handler)
-    var bound = false
+
 
     val connection = object : ServiceConnection {
       override fun onServiceConnected(name: ComponentName, binder: IBinder) {
+
         messenger = Messenger(binder)
         val msg = Message.obtain(null, 1, 0, 0)
-
-
-
-
-
-
-
-
-
-
-
         msg.data.putString("authorization", accessToken)
         msg.data.putString("credential_configuration_id", offered.credentialConfigurationIds[0])
         msg.replyTo = replier
         messenger?.send(msg)
 
-        bound = true
       }
-
       override fun onServiceDisconnected(name: ComponentName?) {
         messenger = null
-        bound = false
       }
     }
     val intent = Intent()
 
     intent.setClassName(
       "com.example.mobileissuer",
+
+
+
       "com.example.mobileissuer.IssuanceService"
     )
+
     context.bindService(intent, connection, Context.BIND_AUTO_CREATE)
     Looper.loop()
   }
@@ -190,10 +171,9 @@ fun readBinary(filename: String, application: Application) : ByteArray {
   return binary
 }
 
-fun tokenToPayload(jwt: String) : JsonObject {
 
+fun tokenToPayload(jwt: String) : JsonObject {
   val decoder = Base64.getUrlDecoder()
   //The actual content of the encoded JSON is in the second part, the one after the first dot. Decode the JWT and then convert the resulting JSON string into an object.
   return Json.parseToJsonElement(decoder.decode(jwt.split(".")[1]).decodeToString()).jsonObject
 }
-

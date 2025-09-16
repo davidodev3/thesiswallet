@@ -15,14 +15,14 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlin.uuid.ExperimentalUuidApi
+
+import kotlin.uuid.Uuid
 import androidx.compose.ui.Modifier
 import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
@@ -31,36 +31,26 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mobileissuer.ui.theme.MobileWalletTheme
 import id.walt.crypto.keys.jwk.JWKKey
+
 import id.walt.oid4vc.OpenID4VC as OpenID
-
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableStateFlow
-
-
-
-
-
-
-
-
-
-
-
-
-
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import kotlin.uuid.ExperimentalUuidApi
-
-import kotlin.uuid.Uuid
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 
 class CredentialModel(context: Application) : AndroidViewModel(context) {
+
+
 
   /*This is not exposed as state flow because realistically speaking at worst
   this gets updated once per application start. Also any change does not really impact the UI.
   So in short no preference listener.*/
   private val didPrefs = context.getSharedPreferences("did", Context.MODE_PRIVATE)
+
   private val sessionPrefs = context.getSharedPreferences("session", Context.MODE_PRIVATE)
+
 
   //Mapping of data to be passed to the generated credential
   private val _mapping = MutableStateFlow(mutableStateMapOf<String, String>())
@@ -137,19 +127,9 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
       var passportNumber by remember { mutableStateOf("AAAAAA") }
       var visaType by remember { mutableStateOf("Tourism") }
       var entryNumber by remember { mutableStateOf("Single") }
-
-
-
-
-
-
-
-
-
-
-
       var duration by remember { mutableStateOf("90") }
       var purposeOfVisit by remember { mutableStateOf("Tourism") }
+
       OutlinedTextField(value = firstName, onValueChange = { v: String ->
 
         mapping["firstName"] = v
@@ -162,6 +142,8 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
       OutlinedTextField(value = gender, onValueChange = { v: String ->
         mapping["gender"] = v
 
+
+
         gender = v
       }, label = {Text("Gender")})
       OutlinedTextField(value = nationality, onValueChange = { v: String ->
@@ -169,9 +151,9 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
         nationality = v
       }, label = {Text("Nationality")})
       OutlinedTextField(value = dateOfBirth, onValueChange = { v: String ->
+
         mapping["dateOfBirth"] = v
         dateOfBirth = v
-
       }, label = {Text("Date of birth")})
       OutlinedTextField(value = passportNumber, onValueChange = { v: String ->
         mapping["passportNumber"] = v
@@ -179,9 +161,9 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
       }, label = {Text("Passport number")})
       OutlinedTextField(value = visaType, onValueChange = { v: String ->
         mapping["visaType"] = v
+
         visaType = v
       }, label = {Text("Visa type")})
-
       OutlinedTextField(value = entryNumber, onValueChange = { v: String ->
         mapping["entryNumber"] = v
         entryNumber = v
@@ -189,9 +171,9 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
       OutlinedTextField(value = duration, onValueChange = { v: String ->
         mapping["duration"] = v
         duration = v
+
       }, label = {Text("Duration")})
       OutlinedTextField(value = purposeOfVisit, onValueChange = { v: String ->
-
         mapping["purposeOfVisit"] = v
         purposeOfVisit = v
       }, label = {Text("Purpose of visit")})
@@ -199,22 +181,20 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
   } else {
     fields = {}
   }
+
   if (showDialog) {
     CredentialDialog(content) { showDialog = false }
-
   }
-
   MobileWalletTheme {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
       Column(modifier = Modifier.padding(innerPadding)) {
         Text(credential)
         fields()
         ElevatedButton(onClick = {
-          coroutineScope.launch {
 
+          coroutineScope.launch {
             loading = true
 
-            //TODO: rewrite better
             try {
               content = credentialModel.generateCredential(
                 credential, activity?.intent?.getStringExtra(Intent.EXTRA_TEXT) ?: "did:key:placeholder"
@@ -237,29 +217,20 @@ fun CredentialScreen(credential: String, credentialModel: CredentialModel = view
                 activity.finish()
               }
             }
-
-
-
-
-
-
-
-
-
-
-
           }
           showDialog = true
+
         }) {
 
           if (loading) {
             CircularProgressIndicator()
-          } else {
+          }
+          else {
             Text("Generate")
           }
         }
       }
     }
-  }
 
+  }
 }

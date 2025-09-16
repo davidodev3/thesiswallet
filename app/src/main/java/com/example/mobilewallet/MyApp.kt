@@ -37,22 +37,13 @@ class MyApp : Application(), CoroutineScope {
           putString("did", resolved.second)
 
           putString("key", resolved.first.exportJWK())
-
-
-
-
-
-
-
-
-
-
-
           apply()
         }
       }
-
     }
+
+
+
   }
 }
 
@@ -60,4 +51,5 @@ suspend fun generateKeyDid() : Pair<JWKKey, String> {
   val key =JWKKey.generate(KeyType.Ed25519)
   val did = DidService.registerByKey("key", key).did
   return Pair(key, did)
+
 }

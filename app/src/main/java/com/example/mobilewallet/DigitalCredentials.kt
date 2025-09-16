@@ -37,27 +37,17 @@ class CustomAuthorizationRequest(
   fun toUnsignedJWT() : String{
     val format = Json {explicitNulls = false}
     val header = format.encodeToString(mutableMapOf("alg" to "none", "typ" to "oauth-authz-req+jwt"))
-
-
-
-
-
-
-
-
-
-
-
     val payload = format.encodeToString(this)
 
     //Return request as unsigned JWT
-
     return (Base64.Default.encode(header.encodeToByteArray()) +
+
+
+
             "." +
             Base64.Default.encode(payload.encodeToByteArray()) + "..")
+
   }
-
-
 }
 
 @Serializable
@@ -91,22 +81,27 @@ interface Credential {
 }
 
 interface DigitalCredential : Credential {
+
   val protocol: String
   val data: CustomAuthorizationResponse
+
 }
 
 @Serializable
 class CustomDigitalCredential(
 
   override val id: String,
+
   override val type: String,
   override val protocol: String,
   override val data: CustomAuthorizationResponse
 
 ) : DigitalCredential {
   companion object {
+
     fun userAgentAllowsProtocol(protocol: String): Boolean {
       return protocol == "openid4vp-v1-unsigned"
+
     }
   }
 }
@@ -116,6 +111,7 @@ class CustomDigitalCredential(
 class CustomAuthorizationResponse(
   val response: String
 ) {
+
   companion object {
     fun fromCredentialMapping(token: Map<String, List<String>>) : CustomAuthorizationResponse {
       return CustomAuthorizationResponse("vp_token=${Json.encodeToString(token)}")

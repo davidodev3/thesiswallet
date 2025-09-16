@@ -37,43 +37,31 @@ class CustomAuthorizationRequest(
 @Serializable
 class DCQLQuery(
   val credentials: List<DCQLCredential>
-
-
-
-
-
-
-
-
-
-
-
 )
 
 @Serializable
-
 class DCQLCredential (
+
+
+
   @SerialName("id")
   val credentialId: String,
   val format: String,
   val meta: DCAPIMeta
 )
 
+
+
 @Serializable
 class DCAPIMeta (
-
   @SerialName("type_values")
-
   val typeValues: List<List<String>>
 )
 
 @Serializable
-class A
-
-@Serializable
-
 class CustomAuthorizationResponse(
   val response: String
+
 ) {
   companion object {
     fun fromCredentialMapping(token: Map<String, List<String>>) : CustomAuthorizationResponse {

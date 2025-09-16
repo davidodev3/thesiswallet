@@ -37,26 +37,19 @@ class CredentialRequestOptions(val digital: DigitalCredentialRequestOptions) {
 
 @Serializable
 class CustomDigitalCredential(
-
-
-
-
-
-
-
-
-
-
-
   override val id: String,
   override val type: String,
   override val protocol: String,
-
   override val data: CustomAuthorizationResponse
+
+
+
 ) : DigitalCredential {
   companion object {
+
     fun userAgentAllowsProtocol(protocol: String): Boolean {
       return protocol == "openid4vp-v1-unsigned"
     }
   }
+
 }

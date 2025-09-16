@@ -79,7 +79,7 @@ dependencies {
   implementation(libs.androidx.material3)
   implementation(libs.androidx.navigation.compose.android)
   implementation(      libs.androidx.navigation.runtime.android)
-  testImplementation(libs.junit)
+  testImplementation(libs.junits)
   androidTestImplementation(libs.androidx.junit)
 
   implementation(libs.kotlinx.serialization.json)

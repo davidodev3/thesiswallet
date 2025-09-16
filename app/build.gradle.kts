@@ -80,7 +80,7 @@ dependencies {
   implementation(libs.androidx.lifecycle.viewmodel.compose)
   implementation(libs.androidx.navigation.compose)
   implementation(libs.androidx.registry.provider)
-  testImplementation(libs.junit)
+  testImplementation(libs.junits)
 
   implementation(libs.waltid.verifiable.credentials)
   implementation(libs.waltid.crypto)

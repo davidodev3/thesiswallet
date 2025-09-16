@@ -37,22 +37,13 @@ class IssuanceService : Service() {
         val public = JWKKey.importJWK(key).getOrNull()!!.getPublicKey()
         if (OpenID4VC.verifyTokenSignature(TokenTarget.ACCESS, token!!, public)) {
           val sessionSharedPrefs =
-
-
-
-
-
-
-
-
-
-
-
             applicationContext.getSharedPreferences("session", Context.MODE_PRIVATE)
           val session = tokenToPayload(token!!)["sub"].toString().removeSurrounding("\"")
           val res = Message.obtain()
-
           res.data.putString(
+
+
+
             "credentials",
             Json.encodeToString(
               arrayOf(
@@ -60,8 +51,8 @@ class IssuanceService : Service() {
               )
             )
           )
-          msg.replyTo.send(res)
 
+          msg.replyTo.send(res)
           sessionSharedPrefs.edit(commit = true) {
             remove(session)
             clear() //TODO remove
@@ -70,6 +61,7 @@ class IssuanceService : Service() {
         }
       }
     }
+
   }
 
   override fun onBind(intent: Intent): IBinder? {

@@ -10,7 +10,6 @@ import kotlin.coroutines.CoroutineContext
 
 class MyApp : Application(), CoroutineScope {
 
-
   override val coroutineContext : CoroutineContext get() = Job() + Dispatchers.Main
 
   override fun onCreate() {
@@ -21,8 +20,8 @@ class MyApp : Application(), CoroutineScope {
     val preferences = applicationContext.getSharedPreferences("did", Context.MODE_PRIVATE)
 
     //Generate key and DID pair if none was found.
-
     if (preferences.all.isEmpty()) {
+
       launch {
         val keydid = async {
           generateKeyDid()
@@ -31,22 +30,10 @@ class MyApp : Application(), CoroutineScope {
           val resolved = keydid.await()
           putString("did", resolved.second)
           putString("key", resolved.first.exportJWK())
-
           apply()
+
         }
       }
-
-
-
-
-
-
-
-
-
-
-
-
     }
   }
 }

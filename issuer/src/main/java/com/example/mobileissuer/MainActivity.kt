@@ -38,19 +38,11 @@ class Credential(val type: String)
 @Serializable
 object Home
 
-
-
-
-
-
-
-
-
-
-
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+
 
     enableEdgeToEdge()
     setContent {
@@ -59,9 +51,9 @@ class MainActivity : ComponentActivity() {
   }
 }
 
+
 @Composable
 fun MyHost(
-
   modifier: Modifier = Modifier,
   navController: NavHostController = rememberNavController()
 ) {
@@ -69,15 +61,17 @@ fun MyHost(
     composable<Home> {
       MobileWalletTheme {
         val model : CredentialModel = viewModel()
-        val clipboard = LocalClipboardManager.current
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
 
+        val clipboard = LocalClipboardManager.current
+
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
           Column() {
             Heading(
               modifier = Modifier.padding(innerPadding)
             )
             CredentialCard("Visa") { navController.navigate(Credential("Visa")) }
             CredentialCard("University Degree") { navController.navigate(Credential("UniversityDegree")) }
+
             Regeneration()
             ElevatedButton(onClick = {
               clipboard.setText(AnnotatedString(model.getDid()))
@@ -87,11 +81,11 @@ fun MyHost(
               clipboard.setText(AnnotatedString(model.getKey()))
             }) { Text("JWK pair") }
           }
+
         }
       }
     }
     composable<Credential> { bsEntry ->
-
       val credential: Credential = bsEntry.toRoute()
       CredentialScreen(credential.type)
     }
@@ -101,30 +95,35 @@ fun MyHost(
 //TODO: Remove
 class ButtonModel(application: Application) : AndroidViewModel(application) {
 
-
   private val _preferences = application.getSharedPreferences("did", Context.MODE_PRIVATE)
 
   fun regenerate() {
     viewModelScope.launch {
+
       val keydid = async {
+
         generateKeyDid()
+
       }
+
       with(_preferences.edit()) {
         val resolved = keydid.await()
-
         putString("did", resolved.second)
         putString("key", resolved.first.exportJWK())
         apply()
+
       }
     }
-
   }
 }
 
-
 @Composable
 fun Regeneration(buttonModel: ButtonModel = viewModel()) {
+
   ElevatedButton(onClick = {
+
     buttonModel.regenerate()
+
   }) {Text("Regenerate")}
+
 }

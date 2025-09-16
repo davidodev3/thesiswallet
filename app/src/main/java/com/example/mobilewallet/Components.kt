@@ -37,29 +37,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
-
-
-
-
-
-
-
-
-
-
-
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
-
 import androidx.lifecycle.AndroidViewModel
+
+
+
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
+
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
+
+import kotlinx.coroutines.launch
+
 import kotlinx.serialization.json.jsonObject
 
 //Dialog that pops up when generating a presentation without having been redirected by the verifier.
@@ -67,11 +61,11 @@ import kotlinx.serialization.json.jsonObject
 fun CredentialDialog(content: String, onDismissRequest: () -> Unit) {
 
   AlertDialog(
+
     onDismissRequest = onDismissRequest,
     title = { Text(text = "Verifiable presentation:") },
     dismissButton = {
       TextButton(onClick = onDismissRequest) { Text("Dismiss") }},
-
     confirmButton = {
       val clipboardManager = LocalClipboardManager.current
       TextButton(onClick = {
@@ -81,17 +75,16 @@ fun CredentialDialog(content: String, onDismissRequest: () -> Unit) {
       }) { Text("Confirm") }
     },
     text = {
-
       SelectionContainer {
         Text(content, modifier = Modifier.verticalScroll(rememberScrollState()))
       }
     },
+
   )
 
 }
 
 @Composable
-
 fun Greeting(name: String, modifier: Modifier = Modifier) {
   Text(
     text = "Hello $name!", modifier = modifier, fontSize = TextUnit(38.0f, TextUnitType.Sp)
@@ -101,69 +94,64 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
 @Composable
 fun Subtitle() {
-
   Text(text = "Your wallets", fontSize = TextUnit(30.0f, TextUnitType.Sp))
 }
 
 @Composable
 fun AddButton(onClick: () -> Unit) {
+
   FloatingActionButton(onClick = onClick) {
+
     Icon(
       Icons.Filled.Add, "Add new wallet or digital credential"
     )
 
   }
+
 }
+
+
 
 @Composable
 fun CardWallet(name: String, onClick: (String) -> Unit, delete: () -> Unit) {
   Card(
     modifier = Modifier
       .fillMaxWidth()
-
-
       .padding(16.00.dp)
       .height(100.0.dp)
       .clickable {onClick(name)}
   ) {
+
     Row() {
       Text(name, Modifier.padding(16.00.dp))
       IconButton(onClick = delete) {
         Icon(
           Icons.Filled.Delete, "Delete selected wallet"
-
         )
       }
     }
+
+
   }
 }
-
-
-
-
-
-
-
-
-
-
 
 @Composable
 fun ListColumn(walletModel: WalletModel = viewModel(), issuedCredentialModel: IssuedCredentialModel = viewModel(), onClick: (String) -> Unit) {
   val wallets by walletModel.wallets.collectAsStateWithLifecycle()
-
   val credential by issuedCredentialModel.credential.collectAsStateWithLifecycle()
   val application = LocalContext.current
   var callback = onClick
 
+
+
   if (wallets.isEmpty()) {
     Text("You don't have any wallets yet.")
+
   }
-
   else {
-
     LazyColumn {
       items(wallets) { name ->
+
         if (credential != "") {
           val dom : DocumentModel = viewModel(
             factory = DocumentModelFactory(
@@ -171,19 +159,19 @@ fun ListColumn(walletModel: WalletModel = viewModel(), issuedCredentialModel: Is
             )
           )
           callback = { s ->
-
             dom.addDocument(credential)
             issuedCredentialModel.updateIssuedCredential("")
+
             onClick(s)
           }
         }
-
         CardWallet(name, callback) {
           walletModel.removeWallet(name)
         }
 
       }
     }
+
   }
 }
 
@@ -193,6 +181,7 @@ fun AddWalletDialog(walletModel: WalletModel = viewModel(), onDismissRequest: ()
   AlertDialog(
 
     onDismissRequest = onDismissRequest,
+
     title = { Text(text = "Add wallet") },
     dismissButton = {
       TextButton(onClick = onDismissRequest) { Text("Dismiss") }
@@ -201,8 +190,8 @@ fun AddWalletDialog(walletModel: WalletModel = viewModel(), onDismissRequest: ()
       TextButton(onClick = {
         walletModel.addWallet(value)
         onDismissRequest()
-
       }) { Text("Confirm") }
+
     },
     text = {
       OutlinedTextField(value = value, onValueChange = { v -> value = v }
@@ -211,8 +200,8 @@ fun AddWalletDialog(walletModel: WalletModel = viewModel(), onDismissRequest: ()
   )
 }
 
-
 //TODO: Remove
+
 class ButtonModel(application: Application) : AndroidViewModel(application) {
   private val _preferences = application.getSharedPreferences("did", Context.MODE_PRIVATE)
 
@@ -221,61 +210,48 @@ class ButtonModel(application: Application) : AndroidViewModel(application) {
       val keydid = async {
         generateKeyDid()
       }
-
       with(_preferences.edit()) {
+
         val resolved = keydid.await()
         putString("did", resolved.second)
         putString("key", resolved.first.exportJWK())
-
         apply()
+
       }
     }
   }
-
 }
 
 @Composable
 fun Regeneration(buttonModel: ButtonModel = viewModel()) {
-
-
-
-
-
-
-
-
-
-
-
-
   ElevatedButton(onClick = {
     buttonModel.regenerate()
   }) {Text("Regenerate")}
-
 }
 
 @Composable
 fun AddDocumentDialog(documentModel: DocumentModel, onDismissRequest: () -> Unit) {
+
   var value by remember { mutableStateOf("") }
   AlertDialog(
     onDismissRequest = onDismissRequest,
     title = { Text(text = "Import credential") },
     dismissButton = {
-
       TextButton(onClick = onDismissRequest) { Text("Dismiss") }
     },
     confirmButton = {
       TextButton(onClick = {
-        documentModel.addDocument(value)
 
+
+
+        documentModel.addDocument(value)
         onDismissRequest()
       }) { Text("Confirm") }
     },
-
     text = {
       OutlinedTextField(value = value, onValueChange = { v -> value = v }, singleLine = true
-
       )
+
     },
   )
 }
@@ -285,6 +261,7 @@ fun CredentialCard(jwt: String, onClick: (String) -> Unit, delete: () -> Unit) {
   Card(
     modifier = Modifier
       .fillMaxWidth()
+
       .padding(16.00.dp)
       .height(100.0.dp)
       .clickable {onClick(jwt)}

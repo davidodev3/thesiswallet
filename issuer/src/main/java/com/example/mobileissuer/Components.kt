@@ -37,20 +37,12 @@ fun Heading(modifier: Modifier = Modifier) {
 fun CredentialCard(credential: String, onClick: () -> Unit) {
   Card(
     colors = CardDefaults.cardColors(),
-
-
-
-
-
-
-
-
-
-
     modifier = Modifier
       .height(100.0.dp)
       .padding(8.dp)
       .fillMaxWidth()
+
+
 
       .clickable {onClick()}
   ) {
@@ -59,6 +51,7 @@ fun CredentialCard(credential: String, onClick: () -> Unit) {
 }
 
 //Dialog shown when generating a credential
+
 @Composable
 fun CredentialDialog(content: String, onDismissRequest: () -> Unit) {
 
@@ -66,20 +59,19 @@ fun CredentialDialog(content: String, onDismissRequest: () -> Unit) {
     onDismissRequest = onDismissRequest,
     title = { Text(text = "Issued credential:") },
     dismissButton = {
-
       TextButton(onClick = onDismissRequest) { Text("Dismiss") }
     },
+
     confirmButton = {
       val clipboardManager = LocalClipboardManager.current
-
       TextButton(onClick = {
         clipboardManager.setText(AnnotatedString(content))
         onDismissRequest()
       }) { Text("Confirm") }
-
     },
     text = {
       SelectionContainer {
+
         Text(content, modifier = Modifier.verticalScroll(rememberScrollState()))
 
       }
